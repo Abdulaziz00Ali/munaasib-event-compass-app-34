@@ -1,10 +1,16 @@
 import React from 'react';
-import { ChefHat, Coffee, Grid2X2, Calendar, Bell, Search } from 'lucide-react';
+import { ChefHat, Coffee, Grid2X2, Calendar, Bell, Search, Star, MapPin } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import CategoryCard from '@/components/ui/CategoryCard';
 import ServiceCard from '@/components/ui/ServiceCard';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Home = () => {
   const categories = [
@@ -37,27 +43,35 @@ const Home = () => {
   const featuredVendors = [
     {
       id: '1',
-      name: 'قاعة الملكية',
-      location: 'حي النرجس، الرياض',
-      image: 'https://source.unsplash.com/featured/?wedding,hall',
+      name: 'مطبخ السعادة',
+      location: 'الرياض',
+      distance: 3.5,
+      image: 'https://source.unsplash.com/featured/?food,catering',
       rating: 4.8,
-      price: 8000,
     },
     {
       id: '2',
-      name: 'قاعة الأميرة',
-      location: 'حي العليا، الرياض',
-      image: 'https://source.unsplash.com/featured/?event,venue',
-      rating: 4.9,
-      price: 7500,
+      name: 'سعادة',
+      location: 'الرياض',
+      distance: 3.5,
+      image: 'https://source.unsplash.com/featured/?meal,food',
+      rating: 4.8,
     },
     {
       id: '3',
-      name: 'قاعة السلطان',
-      location: 'حي الورود، الرياض',
-      image: 'https://source.unsplash.com/featured/?celebration,hall',
+      name: 'مطبخ الشرق',
+      location: 'الرياض',
+      distance: 4.2,
+      image: 'https://source.unsplash.com/featured/?kitchen,cooking',
       rating: 4.7,
-      price: 6200,
+    },
+    {
+      id: '4',
+      name: 'مطبخ الأصالة',
+      location: 'الرياض',
+      distance: 5.1,
+      image: 'https://source.unsplash.com/featured/?arabic,food',
+      rating: 4.9,
     },
   ];
 
@@ -106,23 +120,42 @@ const Home = () => {
 
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">مقدمو خدمة مميزون</h2>
+            <h2 className="text-xl font-bold">مزودو خدمات مميزون</h2>
             <Link to="/vendors" className="text-munaasib-red">عرض الكل</Link>
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
-            {featuredVendors.map((vendor) => (
-              <ServiceCard
-                key={vendor.id}
-                id={vendor.id}
-                name={vendor.name}
-                location={vendor.location}
-                image={vendor.image}
-                rating={vendor.rating}
-                price={vendor.price}
-              />
-            ))}
-          </div>
+          <Carousel className="w-full">
+            <CarouselContent className="-ml-4">
+              {featuredVendors.map((vendor) => (
+                <CarouselItem key={vendor.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                  <Card className="border-none shadow-sm">
+                    <CardContent className="p-0">
+                      <Link to={`/service/${vendor.id}`}>
+                        <div className="relative">
+                          <img
+                            src={vendor.image}
+                            alt={vendor.name}
+                            className="object-cover w-full h-36 rounded-t-lg"
+                          />
+                        </div>
+                        <div className="p-3">
+                          <div className="mb-1 font-bold">{vendor.name}</div>
+                          <div className="flex items-center text-sm text-gray-600 mb-1">
+                            <Star className="h-4 w-4 text-yellow-500 mr-1 ml-1" fill="currentColor" />
+                            <span>{vendor.rating}</span>
+                          </div>
+                          <div className="flex items-center text-sm text-gray-600">
+                            <MapPin className="h-4 w-4 mr-1 ml-1" />
+                            <span>{vendor.location} · {vendor.distance} كم</span>
+                          </div>
+                        </div>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
         </div>
       </div>
     </Layout>
