@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { ChefHat, Coffee, Grid2X2, Calendar } from 'lucide-react';
+import { ChefHat, Coffee, Grid2X2, Calendar, Bell, Search } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import CategoryCard from '@/components/ui/CategoryCard';
 import ServiceCard from '@/components/ui/ServiceCard';
