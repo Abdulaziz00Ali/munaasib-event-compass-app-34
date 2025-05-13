@@ -14,6 +14,11 @@ import ServiceDetails from "./pages/ServiceDetails";
 import BookingForm from "./pages/BookingForm";
 import EventPlanner from "./pages/EventPlanner";
 import NotFound from "./pages/NotFound";
+import SignIn from "./pages/SignIn";
+import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import VerificationCode from "./pages/VerificationCode";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +38,11 @@ const App = () => (
           <Route path="/service/:id" element={<ServiceDetails />} />
           <Route path="/booking/:id" element={<BookingForm />} />
           <Route path="/event-planner" element={<EventPlanner />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verification-code" element={<VerificationCode />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
