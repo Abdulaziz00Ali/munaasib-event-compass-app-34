@@ -64,13 +64,13 @@ const ResetPassword = () => {
             </button>
           </div>
 
-          <Button className="w-full bg-[#DC143C] py-6 text-lg hover:bg-[#C01232]">
+          <Button className="w-full bg-[#987654] py-6 text-lg hover:bg-[#876543]">
             تأكيد
           </Button>
         </div>
 
         <div className="text-center mt-6 flex justify-center gap-1">
-          <Link to="/login" className="text-blue-500 mr-1">
+          <Link to="/login" className="text-[#987654] mr-1">
             تسجيل الدخول
           </Link>
           <span className="text-gray-600">هل لديك حساب؟</span>

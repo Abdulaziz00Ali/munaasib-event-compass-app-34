@@ -14,7 +14,7 @@ const Login = () => {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="rounded-full bg-gray-100 p-8">
-              <div className="text-[#DC143C] text-xl font-bold">منسق</div>
+              <div className="text-[#987654] text-xl font-bold">منسق</div>
             </div>
           </div>
           <p className="text-lg text-gray-600">خطط لزفافك بسهولة</p>
@@ -47,19 +47,19 @@ const Login = () => {
             </button>
           </div>
 
-          <Button className="w-full bg-[#DC143C] py-6 text-lg hover:bg-[#C01232]">
+          <Button className="w-full bg-[#987654] py-6 text-lg hover:bg-[#876543]">
             تسجيل الدخول
           </Button>
         </div>
 
         <div className="text-center mt-4">
-          <Link to="/forgot-password" className="text-sm text-blue-500">
+          <Link to="/forgot-password" className="text-sm text-[#987654]">
             نسيت كلمة المرور؟
           </Link>
         </div>
 
         <div className="text-center mt-6 flex justify-center gap-1">
-          <Link to="/signin" className="text-[#DC143C] font-bold">
+          <Link to="/signin" className="text-[#987654] font-bold">
             إنشاء حساب
           </Link>
           <span className="text-gray-600">ليس لديك حساب؟</span>

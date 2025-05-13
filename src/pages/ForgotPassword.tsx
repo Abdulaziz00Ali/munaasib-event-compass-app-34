@@ -31,13 +31,13 @@ const ForgotPassword = () => {
             />
           </div>
 
-          <Button className="w-full bg-[#DC143C] py-6 text-lg hover:bg-[#C01232]">
+          <Button className="w-full bg-[#987654] py-6 text-lg hover:bg-[#876543]">
             إرسال رمز التحقق
           </Button>
         </div>
 
         <div className="text-center mt-6 flex justify-center gap-1">
-          <Link to="/login" className="text-blue-500">
+          <Link to="/login" className="text-[#987654]">
             تذكرت كلمة المرور؟ تسجيل الدخول
           </Link>
         </div>

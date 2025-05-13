@@ -41,10 +41,10 @@ const VerificationCode = () => {
         <div className="text-center mb-10">
           <div className="flex justify-center mb-4">
             <div className="rounded-full bg-red-50 p-8">
-              <div className="text-[#DC143C] flex items-center justify-center">
+              <div className="text-[#987654] flex items-center justify-center">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21 8L17 12H19C19 15.866 15.866 19 12 19C10.5992 19 9.27532 18.5578 8.17572 17.8073L6.69335 19.2896C8.19434 20.3752 10.0242 21 12 21C16.9706 21 21 16.9706 21 12H23L21 8Z" fill="#DC143C"/>
-                  <path d="M5 12C5 8.13401 8.13401 5 12 5C13.4008 5 14.7247 5.44221 15.8243 6.19266L17.3067 4.71035C15.8057 3.62476 13.9758 3 12 3C7.02944 3 3 7.02944 3 12H1L3 16L7 12H5Z" fill="#DC143C"/>
+                  <path d="M21 8L17 12H19C19 15.866 15.866 19 12 19C10.5992 19 9.27532 18.5578 8.17572 17.8073L6.69335 19.2896C8.19434 20.3752 10.0242 21 12 21C16.9706 21 21 16.9706 21 12H23L21 8Z" fill="#987654"/>
+                  <path d="M5 12C5 8.13401 8.13401 5 12 5C13.4008 5 14.7247 5.44221 15.8243 6.19266L17.3067 4.71035C15.8057 3.62476 13.9758 3 12 3C7.02944 3 3 7.02944 3 12H1L3 16L7 12H5Z" fill="#987654"/>
                 </svg>
               </div>
             </div>
@@ -77,7 +77,7 @@ const VerificationCode = () => {
           <p className="text-gray-600">{formatTime()}</p>
         </div>
 
-        <Button className="w-full bg-[#DC143C] py-6 text-lg hover:bg-[#C01232]">
+        <Button className="w-full bg-[#987654] py-6 text-lg hover:bg-[#876543]">
           تأكيد
         </Button>
 
@@ -85,7 +85,7 @@ const VerificationCode = () => {
           <button 
             onClick={handleResend}
             disabled={timer > 0}
-            className={`text-blue-500 ${timer > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`text-[#987654] ${timer > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             إعادة الإرسال لم يصلك الرمز؟
           </button>
