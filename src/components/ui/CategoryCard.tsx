@@ -11,10 +11,10 @@ type CategoryCardProps = {
 
 const CategoryCard: React.FC<CategoryCardProps> = ({ icon, title, path, count }) => {
   return (
-    <Link to={path} className="service-card flex flex-col items-center justify-center py-6">
-      <div className="mb-2">{icon}</div>
-      <h3 className="font-medium text-center">{title}</h3>
-      {count && <p className="text-xs text-munaasib-gold mt-1 text-center">{count}</p>}
+    <Link to={path} className="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center justify-center">
+      <div className="text-munaasib-red mb-2">{icon}</div>
+      <h3 className="font-medium text-sm text-center">{title}</h3>
+      {count && <p className="text-xs text-gray-500 mt-1 text-center">{count}</p>}
     </Link>
   );
 };
