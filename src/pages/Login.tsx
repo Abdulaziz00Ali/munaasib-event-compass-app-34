@@ -14,7 +14,7 @@ const Login = () => {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="rounded-full bg-gray-100 p-8">
-              <div className="text-[#987654] text-xl font-bold">منسق</div>
+              <div className="text-[#987654] text-xl font-bold">مناسب</div>
             </div>
           </div>
           <p className="text-lg text-gray-600">خطط لزفافك بسهولة</p>
