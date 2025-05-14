@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Calendar, User, Search } from 'lucide-react';
+import { Home, Calendar, User, Search, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const BottomNav: React.FC = () => {
@@ -19,6 +19,11 @@ const BottomNav: React.FC = () => {
       path: '/bookings'
     },
     {
+      icon: CalendarDays,
+      label: 'المناسبات',
+      path: '/events'
+    },
+    {
       icon: Search,
       label: 'استكشاف',
       path: '/explore'
@@ -32,7 +37,7 @@ const BottomNav: React.FC = () => {
   
   return (
     <nav className="bg-white fixed bottom-0 left-0 right-0 border-t border-gray-200 z-10">
-      <div className="grid grid-cols-4 h-16">
+      <div className="grid grid-cols-5 h-16">
         {navItems.map((item, index) => {
           const isActive = location.pathname === item.path;
           

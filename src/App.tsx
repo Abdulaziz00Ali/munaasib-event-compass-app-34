@@ -13,6 +13,7 @@ import Help from "./pages/Help";
 import ServiceDetails from "./pages/ServiceDetails";
 import BookingForm from "./pages/BookingForm";
 import EventPlanner from "./pages/EventPlanner";
+import Events from "./pages/Events";
 import NotFound from "./pages/NotFound";
 import SignIn from "./pages/SignIn";
 import Login from "./pages/Login";
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/" element={<Home />} />
           <Route path="/bookings" element={<Bookings />} />
           <Route path="/explore" element={<Explore />} />
+          <Route path="/events" element={<Events />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/help" element={<Help />} />
