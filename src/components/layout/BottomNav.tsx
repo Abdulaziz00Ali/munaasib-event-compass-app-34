@@ -14,11 +14,6 @@ const BottomNav: React.FC = () => {
       path: '/'
     },
     {
-      icon: Calendar,
-      label: 'حجوزاتي',
-      path: '/bookings'
-    },
-    {
       icon: CalendarDays,
       label: 'المناسبات',
       path: '/events'
@@ -27,6 +22,11 @@ const BottomNav: React.FC = () => {
       icon: Search,
       label: 'استكشاف',
       path: '/explore'
+    },
+    {
+      icon: Calendar,
+      label: 'حجوزاتي',
+      path: '/bookings'
     },
     {
       icon: User,
