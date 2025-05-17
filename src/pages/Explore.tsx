@@ -1,8 +1,7 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import ServiceCard from '@/components/ui/ServiceCard';
-import CategoryCard from '@/components/ui/CategoryCard';
 import { useUserType } from '@/hooks/useUserType';
 import { ChefHat, Coffee, Building2, Package } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -11,7 +10,6 @@ import GoogleMapComponent from '@/components/GoogleMapComponent';
 const Explore = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const { userType } = useUserType();
-  const [mapLoaded, setMapLoaded] = useState(false);
   
   const categories = [
     { id: 'kitchens', name: 'المطابخ', icon: <ChefHat className="w-6 h-6 text-red-500" /> },
@@ -20,6 +18,7 @@ const Explore = () => {
     { id: 'accessories', name: 'الكماليات', icon: <Package className="w-6 h-6 text-red-500" /> },
   ];
 
+  // Mock data that would come from Google Places API in a real implementation
   const services = [
     {
       id: '1',
@@ -31,6 +30,7 @@ const Explore = () => {
       priceUnit: 'ر.س',
       category: 'kitchens',
       distance: '5.0 كم',
+      position: { lat: 24.7136, lng: 46.6753 },
     },
     {
       id: '2',
@@ -42,6 +42,7 @@ const Explore = () => {
       priceUnit: 'ر.س',
       category: 'coffee',
       distance: '3.2 كم',
+      position: { lat: 24.7246, lng: 46.6528 },
     },
     {
       id: '3',
@@ -53,6 +54,7 @@ const Explore = () => {
       priceUnit: 'ر.س',
       category: 'venues',
       distance: '4.7 كم',
+      position: { lat: 24.6941, lng: 46.6558 },
     },
   ];
 
@@ -61,6 +63,21 @@ const Explore = () => {
     ? services 
     : services.filter(service => service.category === selectedCategory);
   
+  // Prepare markers for Google Maps
+  const mapMarkers = filteredServices.map(service => ({
+    position: service.position,
+    title: service.name,
+    id: service.id
+  }));
+
+  const handleMarkerClick = (markerId: string) => {
+    // Scroll to the service card when a marker is clicked
+    const serviceElement = document.getElementById(`service-${markerId}`);
+    if (serviceElement) {
+      serviceElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   // If the user is a vendor, redirect them to the VendorDashboard
   if (userType === 'vendor') {
     return (
@@ -82,7 +99,10 @@ const Explore = () => {
   return (
     <Layout title="استكشاف" showSearch>
       <div className="h-64 mb-4 rounded-lg overflow-hidden">
-        <GoogleMapComponent />
+        <GoogleMapComponent 
+          markers={mapMarkers}
+          onMarkerClick={handleMarkerClick}
+        />
       </div>
 
       <div className="mb-4 overflow-x-auto pb-2">
@@ -128,17 +148,18 @@ const Explore = () => {
         <h2 className="text-lg font-bold mb-4">مقدمي الخدمات القريبين</h2>
         <div className="grid grid-cols-1 gap-6">
           {filteredServices.map((service) => (
-            <ServiceCard
-              key={service.id}
-              id={service.id}
-              name={service.name}
-              location={service.location}
-              image={service.image}
-              rating={service.rating}
-              price={service.price}
-              priceUnit={service.priceUnit}
-              subtitle={service.distance}
-            />
+            <div key={service.id} id={`service-${service.id}`}>
+              <ServiceCard
+                id={service.id}
+                name={service.name}
+                location={service.location}
+                image={service.image}
+                rating={service.rating}
+                price={service.price}
+                priceUnit={service.priceUnit}
+                subtitle={service.distance}
+              />
+            </div>
           ))}
         </div>
       </div>

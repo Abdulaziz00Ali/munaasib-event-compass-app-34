@@ -1,10 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, MapPin, Utensils, Coffee, Building, Package } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { 
   Carousel,
   CarouselContent,
@@ -12,8 +11,11 @@ import {
 } from "@/components/ui/carousel";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CategoryCard from '@/components/ui/CategoryCard';
+import GoogleMapComponent from '@/components/GoogleMapComponent';
 
 const Events = () => {
+  const [selectedVenue, setSelectedVenue] = useState<string | null>(null);
+  
   const eventCategories = [
     {
       icon: <Utensils className="w-8 h-8" />,
@@ -52,13 +54,15 @@ const Events = () => {
       location: 'حي النرجس، الرياض',
       image: 'https://source.unsplash.com/featured/?wedding,hall',
       category: 'قاعة',
+      position: { lat: 24.7336, lng: 46.6653 },
     },
     {
       id: '2',
-      title: 'قاعة الملكية',
+      title: 'قاعة الفيصلية',
       location: 'فندق الفيصلية، الرياض',
       image: 'https://source.unsplash.com/featured/?wedding,venue',
       category: 'قاعة',
+      position: { lat: 24.7046, lng: 46.6953 },
     },
   ];
 
@@ -69,6 +73,7 @@ const Events = () => {
       discount: '25%',
       description: 'خصم 25% على جميع القاعات',
       image: 'https://source.unsplash.com/featured/?event,hall',
+      position: { lat: 24.7136, lng: 46.6753 },
     },
     {
       id: '2',
@@ -76,6 +81,7 @@ const Events = () => {
       discount: '15%',
       description: 'خصم 15% على باقات الزفاف',
       image: 'https://source.unsplash.com/featured/?wedding,decoration',
+      position: { lat: 24.7246, lng: 46.6853 },
     },
   ];
 
@@ -86,19 +92,61 @@ const Events = () => {
       price: '5000',
       description: 'تبدأ من 5000 ريال',
       image: 'https://source.unsplash.com/featured/?wedding,decoration',
+      position: { lat: 24.7046, lng: 46.6753 },
     },
     {
       id: '2',
-      name: 'باقة الزفاف الملكي',
+      name: 'باقة الزفاف الفاخر',
       price: '3500',
       description: 'تبدأ من 3500 ريال',
       image: 'https://source.unsplash.com/featured/?wedding,celebration',
+      position: { lat: 24.6946, lng: 46.6653 },
     },
   ];
+
+  // Prepare markers for Google Maps
+  // We're combining all locations for the map
+  const allLocations = [
+    ...featuredHalls,
+    ...specialOffers.map(offer => ({
+      id: `offer-${offer.id}`,
+      title: offer.name,
+      position: offer.position,
+    })),
+    ...eventPackages.map(pkg => ({
+      id: `package-${pkg.id}`,
+      title: pkg.name,
+      position: pkg.position,
+    }))
+  ];
+
+  const mapMarkers = allLocations.map((item: any) => ({
+    position: item.position,
+    title: item.title || item.name,
+    id: item.id,
+  }));
+
+  const handleMarkerClick = (markerId: string) => {
+    setSelectedVenue(markerId);
+    
+    // Scroll to the corresponding item
+    const element = document.getElementById(`item-${markerId}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
 
   return (
     <Layout title="المناسبات">
       <div className="space-y-8 pb-20">
+        {/* Google Map */}
+        <section className="h-64 rounded-lg overflow-hidden">
+          <GoogleMapComponent
+            markers={mapMarkers}
+            onMarkerClick={handleMarkerClick}
+          />
+        </section>
+      
         {/* Service Categories */}
         <section>
           <h2 className="text-lg font-bold mb-4">الخدمات المتاحة</h2>
@@ -108,6 +156,7 @@ const Events = () => {
                 key={index}
                 to={category.path} 
                 className={`${category.bgColor} rounded-xl shadow-sm p-4 flex flex-col items-center justify-center`}
+                id={`category-${index}`}
               >
                 <div className="text-munaasib-red mb-2">{category.icon}</div>
                 <h3 className="font-medium text-sm text-center">{category.title}</h3>
@@ -126,7 +175,12 @@ const Events = () => {
 
           <div className="grid grid-cols-2 gap-4">
             {featuredHalls.map((hall) => (
-              <Link to={`/service/${hall.id}`} key={hall.id}>
+              <Link 
+                to={`/service/${hall.id}`} 
+                key={hall.id}
+                id={`item-${hall.id}`}
+                className={selectedVenue === hall.id ? 'ring-2 ring-munaasib-red rounded-lg' : ''}
+              >
                 <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                   <div className="relative">
                     <img
@@ -156,7 +210,10 @@ const Events = () => {
             {specialOffers.map((offer) => (
               <div 
                 key={offer.id} 
-                className="bg-white rounded-lg shadow-sm overflow-hidden w-full"
+                id={`item-offer-${offer.id}`}
+                className={`bg-white rounded-lg shadow-sm overflow-hidden w-full ${
+                  selectedVenue === `offer-${offer.id}` ? 'ring-2 ring-munaasib-red' : ''
+                }`}
               >
                 <div className="flex">
                   <img
@@ -184,7 +241,13 @@ const Events = () => {
           <h2 className="text-lg font-bold mb-4">باقات المناسبات</h2>
           <div className="grid grid-cols-2 gap-4">
             {eventPackages.map((pkg) => (
-              <div key={pkg.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
+              <div 
+                key={pkg.id}
+                id={`item-package-${pkg.id}`}
+                className={`bg-white rounded-lg shadow-sm overflow-hidden ${
+                  selectedVenue === `package-${pkg.id}` ? 'ring-2 ring-munaasib-red' : ''
+                }`}
+              >
                 <img
                   src={pkg.image}
                   alt={pkg.name}

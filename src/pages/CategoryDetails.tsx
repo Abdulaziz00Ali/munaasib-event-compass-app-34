@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, MapPin, Clock, Users, Coffee, Utensils } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Badge } from "@/components/ui/badge";
 import ServiceCard from "@/components/ui/ServiceCard";
+import GoogleMapComponent from "@/components/GoogleMapComponent";
 
 const CategoryDetails = () => {
   const { category } = useParams<{ category: string }>();
+  const [selectedFilter, setSelectedFilter] = useState<string>('all');
   
-  // Category-specific data
+  // Category-specific data with coordinates for Google Maps
+  // In real implementation, this would come from Google Places API
   const categoryData = {
     kitchens: {
       title: 'المطابخ',
@@ -25,6 +28,7 @@ const CategoryDetails = () => {
           reviews: 128,
           image: 'https://source.unsplash.com/featured/?food,arabic',
           featured: true,
+          position: { lat: 24.7136, lng: 46.6753 },
         },
         {
           id: '2',
@@ -35,6 +39,7 @@ const CategoryDetails = () => {
           rating: 4.7,
           reviews: 95,
           image: 'https://source.unsplash.com/featured/?food,dinner',
+          position: { lat: 24.7246, lng: 46.6558 },
         },
         {
           id: '3',
@@ -45,6 +50,7 @@ const CategoryDetails = () => {
           rating: 4.9,
           reviews: 156,
           image: 'https://source.unsplash.com/featured/?food,meat',
+          position: { lat: 24.7048, lng: 46.6763 },
         },
         {
           id: '4',
@@ -55,6 +61,7 @@ const CategoryDetails = () => {
           rating: 4.6,
           reviews: 87,
           image: 'https://source.unsplash.com/featured/?food,buffet',
+          position: { lat: 24.6941, lng: 46.6858 },
         },
       ],
     },
@@ -77,7 +84,8 @@ const CategoryDetails = () => {
             duration: 'ساعتين',
             providers: 3,
             drinks: ['قهوة عربية', 'شاي وتمر'],
-          }
+          },
+          position: { lat: 24.7336, lng: 46.7053 },
         },
         {
           id: '2',
@@ -93,7 +101,8 @@ const CategoryDetails = () => {
             duration: '٤ ساعات',
             providers: 3,
             drinks: ['قهوة عربية', 'شاي وتمر'],
-          }
+          },
+          position: { lat: 24.7146, lng: 46.6853 },
         },
         {
           id: '3',
@@ -109,7 +118,8 @@ const CategoryDetails = () => {
             duration: '٥ ساعات',
             providers: 4,
             drinks: ['قهوة عربية', 'شاي وتمر'],
-          }
+          },
+          position: { lat: 24.6941, lng: 46.6768 },
         },
       ],
     },
@@ -128,6 +138,7 @@ const CategoryDetails = () => {
           rating: 4.8,
           reviews: 254,
           image: 'https://source.unsplash.com/featured/?wedding,hall',
+          position: { lat: 24.7336, lng: 46.6653 },
         },
         {
           id: '2',
@@ -139,6 +150,7 @@ const CategoryDetails = () => {
           rating: 4.9,
           reviews: 189,
           image: 'https://source.unsplash.com/featured/?wedding,venue',
+          position: { lat: 24.7046, lng: 46.6953 },
         },
         {
           id: '3',
@@ -150,6 +162,7 @@ const CategoryDetails = () => {
           rating: 4.7,
           reviews: 167,
           image: 'https://source.unsplash.com/featured/?wedding,decoration',
+          position: { lat: 24.6841, lng: 46.6458 },
         },
       ],
     },
@@ -166,6 +179,7 @@ const CategoryDetails = () => {
           rating: 4.8,
           reviews: 75,
           image: 'https://source.unsplash.com/featured/?decoration,wedding',
+          position: { lat: 24.7236, lng: 46.6353 },
         },
         {
           id: '2',
@@ -176,6 +190,7 @@ const CategoryDetails = () => {
           rating: 4.8,
           reviews: 120,
           image: 'https://source.unsplash.com/featured/?lights,pathway',
+          position: { lat: 24.7146, lng: 46.6753 },
         },
         {
           id: '3',
@@ -187,6 +202,7 @@ const CategoryDetails = () => {
           rating: 4.9,
           reviews: 89,
           image: 'https://source.unsplash.com/featured/?gift,wrapped',
+          position: { lat: 24.7036, lng: 46.6853 },
         },
         {
           id: '4',
@@ -197,6 +213,7 @@ const CategoryDetails = () => {
           rating: 4.7,
           reviews: 56,
           image: 'https://source.unsplash.com/featured/?entrance,decoration',
+          position: { lat: 24.6936, lng: 46.6653 },
         },
       ],
     },
@@ -215,6 +232,27 @@ const CategoryDetails = () => {
         return <Utensils className="w-5 h-5" />;
       default:
         return null;
+    }
+  };
+  
+  // Filter data based on selected filter
+  const filteredProviders = selectedFilter === 'all' 
+    ? data.providers 
+    : data.providers.filter((provider: any) => 
+        provider.subtitle && provider.subtitle.includes(selectedFilter));
+
+  // Prepare markers for Google Maps
+  const mapMarkers = filteredProviders.map((provider: any) => ({
+    position: provider.position,
+    title: provider.name,
+    id: provider.id
+  }));
+
+  const handleMarkerClick = (markerId: string) => {
+    // Scroll to the service when a marker is clicked
+    const serviceElement = document.getElementById(`service-${markerId}`);
+    if (serviceElement) {
+      serviceElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
   
@@ -244,16 +282,25 @@ const CategoryDetails = () => {
           <p className="text-gray-700">{data.description}</p>
         </div>
         
+        {/* Google Map */}
+        <div className="h-64 mb-4 rounded-lg overflow-hidden">
+          <GoogleMapComponent 
+            markers={mapMarkers}
+            onMarkerClick={handleMarkerClick}
+          />
+        </div>
+        
         {/* Filter options */}
         <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-          {data.filterOptions.map((option, index) => (
+          {data.filterOptions.map((option: string, index: number) => (
             <button
               key={index}
               className={`px-4 py-2 rounded-full text-sm whitespace-nowrap ${
-                index === 0 
+                (index === 0 && selectedFilter === 'all') || option === selectedFilter 
                 ? 'bg-munaasib-red text-white' 
                 : 'bg-white text-gray-700 border border-gray-200'
               }`}
+              onClick={() => setSelectedFilter(index === 0 ? 'all' : option)}
             >
               {option}
             </button>
@@ -263,8 +310,12 @@ const CategoryDetails = () => {
         {categoryKey === 'coffee' ? (
           // Special layout for coffee services with additional info
           <div className="space-y-4">
-            {data.providers.map((provider) => (
-              <div key={provider.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
+            {filteredProviders.map((provider: any) => (
+              <div 
+                key={provider.id} 
+                id={`service-${provider.id}`}
+                className="bg-white rounded-lg shadow-sm overflow-hidden"
+              >
                 <div className="relative">
                   <img
                     src={provider.image}
@@ -290,7 +341,7 @@ const CategoryDetails = () => {
                   </div>
                   {renderCoffeeServiceInfo(provider)}
                   <div className="flex items-center text-gray-600 mt-1">
-                    {provider.additionalInfo?.drinks?.map((drink, idx) => (
+                    {provider.additionalInfo?.drinks?.map((drink: string, idx: number) => (
                       <span key={idx} className="text-sm ml-2 bg-gray-100 px-2 py-1 rounded">{drink}</span>
                     ))}
                   </div>
@@ -311,19 +362,20 @@ const CategoryDetails = () => {
           </div>
         ) : (
           // Default layout for other categories
-          <div className="grid grid-cols-2 gap-4">
-            {data.providers.map((provider) => (
-              <ServiceCard
-                key={provider.id}
-                id={provider.id}
-                name={provider.name}
-                location={provider.location}
-                image={provider.image}
-                rating={provider.rating}
-                price={provider.price}
-                priceUnit={provider.priceUnit}
-                subtitle={provider.subtitle}
-              />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {filteredProviders.map((provider: any) => (
+              <div key={provider.id} id={`service-${provider.id}`}>
+                <ServiceCard
+                  id={provider.id}
+                  name={provider.name}
+                  location={provider.location}
+                  image={provider.image}
+                  rating={provider.rating}
+                  price={provider.price}
+                  priceUnit={provider.priceUnit}
+                  subtitle={provider.subtitle}
+                />
+              </div>
             ))}
           </div>
         )}
