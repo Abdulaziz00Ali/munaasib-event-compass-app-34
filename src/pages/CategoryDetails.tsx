@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, MapPin, Clock, Users, Coffee, Utensils } from 'lucide-react';
@@ -70,7 +69,7 @@ const CategoryDetails = () => {
           location: 'الرياض',
           subtitle: 'ساعتين / ٣ مقدمين',
           price: 750,
-          priceUnit: 'ر.س',
+          priceUnit: 'ر.س / ساعتين',
           rating: 4.9,
           reviews: 92,
           image: '/lovable-uploads/9e85d7d6-e814-4f7c-87d8-6f8c1a1fb9ad.png',
@@ -86,6 +85,7 @@ const CategoryDetails = () => {
           location: 'الرياض',
           subtitle: '٤ ساعات / ٣ مقدمين',
           price: 500,
+          priceUnit: 'ر.س / ٤ ساعات',
           rating: 4.8,
           reviews: 245,
           image: 'https://source.unsplash.com/featured/?arabic,coffee',
@@ -101,6 +101,7 @@ const CategoryDetails = () => {
           location: 'الرياض',
           subtitle: '٥ ساعات / ٤ مقدمين',
           price: 700,
+          priceUnit: 'ر.س / ٥ ساعات',
           rating: 4.6,
           reviews: 189,
           image: 'https://source.unsplash.com/featured/?coffee,cups',
@@ -295,7 +296,7 @@ const CategoryDetails = () => {
                   </div>
                   <div className="flex justify-between items-center mt-4">
                     <div className="font-bold text-munaasib-red text-lg">
-                      {provider.price} {provider.priceUnit || 'ريال'}
+                      {provider.price} {provider.priceUnit}
                     </div>
                     <Link 
                       to={`/service/${provider.id}`} 
