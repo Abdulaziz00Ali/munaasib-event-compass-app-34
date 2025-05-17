@@ -121,12 +121,12 @@ const Events = () => {
         <section>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-bold">قاعات مميزة</h2>
-            <Link to="/halls" className="text-munaasib-red text-sm">عرض الكل</Link>
+            <Link to="/categories/halls" className="text-munaasib-red text-sm">عرض الكل</Link>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             {featuredHalls.map((hall) => (
-              <Link to={`/hall/${hall.id}`} key={hall.id}>
+              <Link to={`/service/${hall.id}`} key={hall.id}>
                 <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                   <div className="relative">
                     <img

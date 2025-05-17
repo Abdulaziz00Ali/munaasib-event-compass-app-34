@@ -11,19 +11,19 @@ const Home = () => {
     {
       icon: <ChefHat size={36} />,
       title: 'المطابخ',
-      path: '/vendors/catering',
+      path: '/categories/kitchens',
       count: 'الأطباق شهية المحلية'
     },
     {
       icon: <Coffee size={36} />,
       title: 'القهوجية',
-      path: '/vendors/coffee',
+      path: '/categories/coffee',
       count: 'خدمات القهوة العربية'
     },
     {
       icon: <Grid2X2 size={36} />,
       title: 'الكماليات',
-      path: '/vendors/accessories',
+      path: '/categories/addons',
       count: 'إضافات مميزة'
     },
     {

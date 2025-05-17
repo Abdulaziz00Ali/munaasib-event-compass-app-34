@@ -49,6 +49,11 @@ const App = () => (
           <Route path="/verification-code" element={<VerificationCode />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/vendor-dashboard" element={<VendorDashboard />} />
+          {/* Add explicit routes for each category */}
+          <Route path="/kitchens" element={<CategoryDetails />} />
+          <Route path="/coffee" element={<CategoryDetails />} />
+          <Route path="/halls" element={<CategoryDetails />} />
+          <Route path="/addons" element={<CategoryDetails />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -82,7 +81,7 @@ const VendorDashboard = () => {
   ];
 
   return (
-    <Layout title="لوحة التحكم" showSearch={false} showNotification={false}>
+    <Layout title="لوحة التحكم" showSearch={false} showNotification={false} showBottomNav={false}>
       <div className="mb-6">
         <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
           <h2 className="text-xl font-bold mb-1">مرحباً، {vendorInfo.name}</h2>
