@@ -1,14 +1,31 @@
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff } from "lucide-react";
+import { useUserType } from "@/hooks/useUserType";
 
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [userType, setUserType] = useState<"client" | "vendor">("client");
+  const { updateUserType } = useUserType();
+  const navigate = useNavigate();
+  
+  const handleSignUp = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Update the user type in the hook/localStorage
+    updateUserType(userType);
+    
+    // Navigate to the appropriate page based on user type
+    if (userType === 'vendor') {
+      navigate('/vendor-dashboard');
+    } else {
+      navigate('/');
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
@@ -41,11 +58,12 @@ const SignIn = () => {
           </Button>
         </div>
 
-        <div className="space-y-4">
+        <form onSubmit={handleSignUp} className="space-y-4">
           <div>
             <Input 
               placeholder="الاسم الكامل" 
               className="bg-gray-50 py-6 text-right" 
+              required
             />
           </div>
           <div>
@@ -53,6 +71,7 @@ const SignIn = () => {
               placeholder="رقم الجوال" 
               className="bg-gray-50 py-6 text-right" 
               type="tel"
+              required
             />
           </div>
           <div className="relative">
@@ -60,6 +79,7 @@ const SignIn = () => {
               placeholder="كلمة المرور" 
               className="bg-gray-50 py-6 text-right"
               type={showPassword ? "text" : "password"}
+              required
             />
             <button 
               type="button"
@@ -75,16 +95,16 @@ const SignIn = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <Checkbox id="terms" className="border-[#6366f1]" />
+            <Checkbox id="terms" className="border-[#6366f1]" required />
             <label htmlFor="terms" className="text-sm text-right flex-1">
               <span className="text-blue-500">موافقتك على هذه الشروط والأحكام</span>
             </label>
           </div>
 
-          <Button className="w-full bg-[#987654] py-6 text-lg hover:bg-[#876543]">
+          <Button type="submit" className="w-full bg-[#987654] py-6 text-lg hover:bg-[#876543]">
             إنشاء حساب
           </Button>
-        </div>
+        </form>
 
         <div className="text-center mt-6">
           <Link to="/login" className="text-[#987654]">
