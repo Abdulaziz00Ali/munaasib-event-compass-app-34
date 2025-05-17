@@ -10,6 +10,7 @@ type ServiceCardProps = {
   rating: number;
   price: number;
   priceUnit?: string;
+  subtitle?: string;  // Added the subtitle prop as optional
 };
 
 const ServiceCard: React.FC<ServiceCardProps> = ({
@@ -19,7 +20,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   image,
   rating,
   price,
-  priceUnit = 'ريال'
+  priceUnit = 'ريال',
+  subtitle
 }) => {
   return (
     <div className="service-card">
@@ -45,6 +47,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
           </svg>
           {location}
         </div>
+        {subtitle && (
+          <div className="text-sm text-gray-500 mb-2">
+            {subtitle}
+          </div>
+        )}
         <div className="flex justify-between items-center mt-2">
           <div className="font-bold text-munaasib-red">
             {price.toLocaleString()} {priceUnit}
