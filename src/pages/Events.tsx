@@ -20,50 +20,44 @@ const Events = () => {
       title: 'المطابخ',
       count: '+200 مزود',
       path: '/categories/kitchens',
+      bgColor: 'bg-pink-50',
     },
     {
       icon: <Coffee className="w-8 h-8" />,
       title: 'القهوجية',
       count: '+150 مزود',
       path: '/categories/coffee',
+      bgColor: 'bg-pink-50',
     },
     {
       icon: <Building className="w-8 h-8" />,
       title: 'القاعات',
       count: '+180 مزود',
       path: '/categories/halls',
+      bgColor: 'bg-blue-50',
     },
     {
       icon: <Package className="w-8 h-8" />,
       title: 'الكماليات',
       count: '+120 مزود',
       path: '/categories/addons',
+      bgColor: 'bg-green-50',
     },
   ];
 
   const featuredHalls = [
     {
       id: '1',
-      title: 'قاعة الملكية الفاخرة',
-      date: '20 مايو 2024',
+      title: 'قاعة الملكية',
       location: 'حي النرجس، الرياض',
       image: 'https://source.unsplash.com/featured/?wedding,hall',
       category: 'قاعة',
     },
     {
       id: '2',
-      title: 'قاعة الفيصلية',
-      date: '5 يونيو 2024',
+      title: 'قاعة الملكية',
       location: 'فندق الفيصلية، الرياض',
       image: 'https://source.unsplash.com/featured/?wedding,venue',
-      category: 'قاعة',
-    },
-    {
-      id: '3',
-      title: 'قاعة المرجان',
-      date: '15 يونيو 2024',
-      location: 'مركز الرياض الدولي للمعارض',
-      image: 'https://source.unsplash.com/featured/?event,hall',
       category: 'قاعة',
     },
   ];
@@ -71,66 +65,34 @@ const Events = () => {
   const specialOffers = [
     {
       id: '1',
-      name: 'قاعة السلطان الملكية',
+      name: 'عرض نهاية الأسبوع',
       discount: '25%',
-      endDate: 'حتى 30 مايو',
-      image: 'https://source.unsplash.com/featured/?wedding,hall',
-      rating: 4.8,
-      location: 'حي النرجس، الرياض',
+      description: 'خصم 25% على جميع القاعات',
+      image: 'https://source.unsplash.com/featured/?event,hall',
     },
     {
       id: '2',
-      name: 'مطبخ الرياض للولائم',
+      name: 'عرض الأسبوع',
       discount: '15%',
-      endDate: 'حتى 15 يونيو',
-      image: 'https://source.unsplash.com/featured/?catering,food',
-      rating: 4.9,
-      location: 'حي الملقا، الرياض',
-    },
-    {
-      id: '3',
-      name: 'استوديو الأمل للتصوير',
-      discount: '30%',
-      endDate: 'لمدة أسبوع فقط',
-      image: 'https://source.unsplash.com/featured/?camera,photography',
-      rating: 4.7,
-      location: 'حي النخيل، الرياض',
-    },
-    {
-      id: '4',
-      name: 'قهوة وضيافة الخليج',
-      discount: '20%',
-      endDate: 'لحفلات نهاية الاسبوع',
-      image: 'https://source.unsplash.com/featured/?coffee,arabic',
-      rating: 4.9,
-      location: 'حي الورود، الرياض',
+      description: 'خصم 15% على باقات الزفاف',
+      image: 'https://source.unsplash.com/featured/?wedding,decoration',
     },
   ];
 
   const eventPackages = [
     {
       id: '1',
-      name: 'باقة الزفاف الكاملة',
-      price: '15,000',
-      description: 'تشمل القاعة، الضيافة، التصوير، والديكور',
+      name: 'باقة الزفاف الملكي',
+      price: '5000',
+      description: 'تبدأ من 5000 ريال',
       image: 'https://source.unsplash.com/featured/?wedding,decoration',
-      rating: 4.8,
     },
     {
       id: '2',
-      name: 'باقة حفلات الخطوبة',
-      price: '8,500',
-      description: 'تشمل الكوشة، الضيافة، والتصوير',
-      image: 'https://source.unsplash.com/featured/?engagement,party',
-      rating: 4.7,
-    },
-    {
-      id: '3',
-      name: 'باقة مناسبات الشركات',
-      price: '12,000',
-      description: 'تشمل الديكور، الضيافة، والتنظيم',
-      image: 'https://source.unsplash.com/featured/?corporate,event',
-      rating: 4.9,
+      name: 'باقة الزفاف الملكي',
+      price: '3500',
+      description: 'تبدأ من 3500 ريال',
+      image: 'https://source.unsplash.com/featured/?wedding,celebration',
     },
   ];
 
@@ -139,16 +101,18 @@ const Events = () => {
       <div className="space-y-8 pb-20">
         {/* Service Categories */}
         <section>
-          <h2 className="text-lg font-bold mb-4">خدمات المناسبات</h2>
+          <h2 className="text-lg font-bold mb-4">الخدمات المتاحة</h2>
           <div className="grid grid-cols-2 gap-4">
             {eventCategories.map((category, index) => (
-              <CategoryCard 
+              <Link 
                 key={index}
-                icon={category.icon}
-                title={category.title}
-                path={category.path}
-                count={category.count}
-              />
+                to={category.path} 
+                className={`${category.bgColor} rounded-xl shadow-sm p-4 flex flex-col items-center justify-center`}
+              >
+                <div className="text-munaasib-red mb-2">{category.icon}</div>
+                <h3 className="font-medium text-sm text-center">{category.title}</h3>
+                {category.count && <p className="text-xs text-gray-500 mt-1 text-center">{category.count}</p>}
+              </Link>
             ))}
           </div>
         </section>
@@ -156,11 +120,11 @@ const Events = () => {
         {/* Featured Halls */}
         <section>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold">اختيار القاعات مميزة</h2>
+            <h2 className="text-lg font-bold">قاعات مميزة</h2>
             <Link to="/halls" className="text-munaasib-red text-sm">عرض الكل</Link>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             {featuredHalls.map((hall) => (
               <Link to={`/hall/${hall.id}`} key={hall.id}>
                 <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -168,15 +132,15 @@ const Events = () => {
                     <img
                       src={hall.image}
                       alt={hall.title}
-                      className="w-full h-40 object-cover"
+                      className="w-full h-28 object-cover"
                     />
-                    <Badge className="absolute top-3 left-3 bg-munaasib-red">{hall.category}</Badge>
+                    <Badge className="absolute bottom-2 start-2 bg-munaasib-red">{hall.category}</Badge>
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-lg mb-2">{hall.title}</h3>
-                    <div className="flex items-center text-gray-600">
-                      <MapPin className="w-4 h-4 ml-1" />
-                      <span className="text-sm">{hall.location}</span>
+                  <div className="p-2">
+                    <h3 className="font-bold text-base">{hall.title}</h3>
+                    <div className="flex items-center text-gray-600 text-xs">
+                      <MapPin className="w-3 h-3 ml-1" />
+                      <span>{hall.location}</span>
                     </div>
                   </div>
                 </div>
@@ -188,81 +152,51 @@ const Events = () => {
         {/* Special Offers */}
         <section>
           <h2 className="text-lg font-bold mb-4">عروض خاصة</h2>
-          <ScrollArea className="w-full">
-            <div className="flex space-x-4 rtl:space-x-reverse pb-4">
-              {specialOffers.map((offer) => (
-                <div 
-                  key={offer.id} 
-                  className="bg-white rounded-lg shadow-sm overflow-hidden min-w-[280px] flex-shrink-0"
-                >
-                  <div className="relative">
-                    <img
-                      src={offer.image}
-                      alt={offer.name}
-                      className="w-full h-36 object-cover"
-                    />
-                    <div className="absolute top-0 left-0 bg-munaasib-red text-white py-1 px-3 rounded-br-lg">
+          <div className="grid gap-4">
+            {specialOffers.map((offer) => (
+              <div 
+                key={offer.id} 
+                className="bg-white rounded-lg shadow-sm overflow-hidden w-full"
+              >
+                <div className="flex">
+                  <img
+                    src={offer.image}
+                    alt={offer.name}
+                    className="w-1/2 h-32 object-cover"
+                  />
+                  <div className="p-3 flex flex-col justify-between w-1/2">
+                    <div>
+                      <h3 className="font-bold text-base">{offer.name}</h3>
+                      <p className="text-xs text-gray-500">{offer.description}</p>
+                    </div>
+                    <div className="text-munaasib-red font-bold text-lg">
                       خصم {offer.discount}
                     </div>
                   </div>
-                  <div className="p-3">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-bold">{offer.name}</h3>
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-yellow-500 ml-1" fill="currentColor" />
-                        <span>{offer.rating}</span>
-                      </div>
-                    </div>
-                    <div className="text-sm text-gray-500 my-2">{offer.endDate}</div>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <MapPin className="h-4 w-4 ml-1" />
-                      <span>{offer.location}</span>
-                    </div>
-                  </div>
                 </div>
-              ))}
-            </div>
-          </ScrollArea>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* Event Packages */}
         <section>
-          <h2 className="text-lg font-bold mb-4">باقات متكاملة</h2>
-          <Carousel className="w-full">
-            <CarouselContent className="-ml-4">
-              {eventPackages.map((pkg) => (
-                <CarouselItem key={pkg.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                  <Card className="border-none shadow-sm">
-                    <CardContent className="p-0">
-                      <div className="relative">
-                        <img
-                          src={pkg.image}
-                          alt={pkg.name}
-                          className="object-cover w-full h-40 rounded-t-lg"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <div className="flex justify-between items-start">
-                          <h3 className="font-bold">{pkg.name}</h3>
-                          <div className="flex items-center">
-                            <Star className="h-4 w-4 text-yellow-500 ml-1" fill="currentColor" />
-                            <span>{pkg.rating}</span>
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-600 my-2">{pkg.description}</div>
-                        <div className="flex justify-between items-center mt-3">
-                          <div className="font-bold text-munaasib-red">{pkg.price} ر.س</div>
-                          <button className="bg-munaasib-red hover:bg-munaasib-darkRed text-white rounded-lg px-4 py-1 transition-colors">
-                            احجز الآن
-                          </button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
+          <h2 className="text-lg font-bold mb-4">باقات المناسبات</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {eventPackages.map((pkg) => (
+              <div key={pkg.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
+                <img
+                  src={pkg.image}
+                  alt={pkg.name}
+                  className="w-full h-28 object-cover"
+                />
+                <div className="p-2">
+                  <h3 className="font-bold text-base">{pkg.name}</h3>
+                  <p className="text-xs text-gray-500 mt-1">{pkg.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
       </div>
     </Layout>

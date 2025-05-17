@@ -1,11 +1,12 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import ServiceCard from '@/components/ui/ServiceCard';
 import CategoryCard from '@/components/ui/CategoryCard';
+import { useUserType } from '@/hooks/useUserType';
 
 const Explore = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const { userType } = useUserType();
 
   const categories = [
     { id: 'all', name: 'الكل' },
@@ -124,6 +125,41 @@ const Explore = () => {
       count: 'مزود +120',
     }
   ];
+
+  if (userType === 'vendor') {
+    return (
+      <Layout title="مقدمي الخدمات" showSearch>
+        <div className="space-y-8">
+          <div className="bg-munaasib-lightGold p-4 rounded-lg mb-6">
+            <h2 className="text-xl font-bold mb-1">مرحباً بك كمزود خدمة</h2>
+            <p className="text-gray-700">يمكنك إدارة خدماتك هنا</p>
+          </div>
+          
+          <div>
+            <h2 className="text-lg font-bold mb-4">خدماتك المتاحة</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {serviceCategories.map((category, index) => (
+                <CategoryCard
+                  key={index}
+                  icon={category.icon}
+                  title={category.title}
+                  path={category.path}
+                  count={category.count}
+                />
+              ))}
+            </div>
+          </div>
+          
+          <div>
+            <h2 className="text-lg font-bold mb-4">إحصائيات الأداء</h2>
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <p className="text-center text-gray-500">لم يتم إضافة أي خدمات بعد</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout title="مقدمي الخدمات" showSearch>

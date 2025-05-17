@@ -14,6 +14,7 @@ import ServiceDetails from "./pages/ServiceDetails";
 import BookingForm from "./pages/BookingForm";
 import EventPlanner from "./pages/EventPlanner";
 import Events from "./pages/Events";
+import CategoryDetails from "./pages/CategoryDetails";
 import NotFound from "./pages/NotFound";
 import SignIn from "./pages/SignIn";
 import Login from "./pages/Login";
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/service/:id" element={<ServiceDetails />} />
           <Route path="/booking/:id" element={<BookingForm />} />
           <Route path="/event-planner" element={<EventPlanner />} />
+          <Route path="/categories/:category" element={<CategoryDetails />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
