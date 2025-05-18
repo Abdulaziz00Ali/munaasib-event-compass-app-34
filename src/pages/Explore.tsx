@@ -3,13 +3,38 @@ import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import ServiceCard from '@/components/ui/ServiceCard';
 import { useUserType } from '@/hooks/useUserType';
-import { ChefHat, Coffee, Building2, Package } from 'lucide-react';
+import { ChefHat, Coffee, Building2, Package, Search, Filter, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import GoogleMapComponent from '@/components/GoogleMapComponent';
+import { Input } from '@/components/ui/input';
+import { toast } from '@/components/ui/sonner';
 
 const Explore = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [sortBy, setSortBy] = useState<'distance' | 'rating' | 'price'>('distance');
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const { userType } = useUserType();
+
+  useEffect(() => {
+    // Try to get user location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        () => {
+          console.log("Unable to retrieve location");
+          // Use default location (Riyadh)
+          setUserLocation({ lat: 24.7136, lng: 46.6753 });
+        }
+      );
+    }
+  }, []);
   
   const categories = [
     { id: 'kitchens', name: 'المطابخ', icon: <ChefHat className="w-6 h-6 text-red-500" /> },
@@ -39,7 +64,7 @@ const Explore = () => {
       image: 'https://source.unsplash.com/featured/?coffee,arabic',
       rating: 4.5,
       price: 80,
-      priceUnit: 'ر.س',
+      priceUnit: 'ر.س / ساعتين',
       category: 'coffee',
       distance: '3.2 كم',
       position: { lat: 24.7246, lng: 46.6528 },
@@ -56,25 +81,94 @@ const Explore = () => {
       distance: '4.7 كم',
       position: { lat: 24.6941, lng: 46.6558 },
     },
+    {
+      id: '4',
+      name: 'متجر هدايا الفرح',
+      location: 'حي الملقا، الرياض',
+      image: 'https://source.unsplash.com/featured/?gifts,wedding',
+      rating: 4.3,
+      price: 200,
+      priceUnit: 'ر.س',
+      category: 'accessories',
+      distance: '6.5 كم',
+      position: { lat: 24.7336, lng: 46.6653 },
+    },
+    {
+      id: '5',
+      name: 'مطبخ الأصالة',
+      location: 'حي المروج، الرياض',
+      image: 'https://source.unsplash.com/featured/?food,catering',
+      rating: 4.7,
+      price: 180,
+      priceUnit: 'ر.س',
+      category: 'kitchens',
+      distance: '2.8 كم',
+      position: { lat: 24.7436, lng: 46.6853 },
+    },
+    {
+      id: '6',
+      name: 'قهوجي الديوان',
+      location: 'حي الملك فهد، الرياض',
+      image: 'https://source.unsplash.com/featured/?arabic,coffee',
+      rating: 4.6,
+      price: 90,
+      priceUnit: 'ر.س / ساعتين',
+      category: 'coffee',
+      distance: '4.1 كم',
+      position: { lat: 24.7046, lng: 46.6953 },
+    }
   ];
 
-  // Filter services based on selected category
-  const filteredServices = selectedCategory === 'all' 
-    ? services 
-    : services.filter(service => service.category === selectedCategory);
+  // Filter services based on selected category and search query
+  const filteredServices = services
+    .filter(service => {
+      const categoryMatch = selectedCategory === 'all' || service.category === selectedCategory;
+      const searchMatch = !searchQuery || 
+        service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        service.location.toLowerCase().includes(searchQuery.toLowerCase());
+      return categoryMatch && searchMatch;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'rating':
+          return b.rating - a.rating;
+        case 'price':
+          return a.price - b.price;
+        case 'distance':
+        default:
+          // Parse the distance value (assuming format like "5.0 كم")
+          const distanceA = parseFloat(a.distance.split(' ')[0]);
+          const distanceB = parseFloat(b.distance.split(' ')[0]);
+          return distanceA - distanceB;
+      }
+    });
   
   // Prepare markers for Google Maps
   const mapMarkers = filteredServices.map(service => ({
     position: service.position,
     title: service.name,
-    id: service.id
+    id: service.id,
+    category: service.category
   }));
 
   const handleMarkerClick = (markerId: string) => {
+    setSelectedServiceId(markerId);
+    
     // Scroll to the service card when a marker is clicked
     const serviceElement = document.getElementById(`service-${markerId}`);
     if (serviceElement) {
       serviceElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  const handleServiceCardClick = (serviceId: string) => {
+    setSelectedServiceId(serviceId);
+    
+    // Find the service to get its position
+    const service = services.find(s => s.id === serviceId);
+    if (service) {
+      // You could add any additional logic here if needed
+      toast(`تم تحديد ${service.name} على الخريطة`);
     }
   };
 
@@ -97,11 +191,39 @@ const Explore = () => {
   }
 
   return (
-    <Layout title="استكشاف" showSearch>
-      <div className="h-64 mb-4 rounded-lg overflow-hidden">
+    <Layout title="استكشاف" showSearch={false}>
+      {/* Search Section */}
+      <div className="mb-4 flex gap-2">
+        <div className="relative flex-grow">
+          <Input
+            type="search"
+            placeholder="ابحث عن خدمات قريبة..."
+            className="pr-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <Search className="w-5 h-5 absolute top-2.5 right-3 text-gray-400" />
+        </div>
+        <div className="relative">
+          <select
+            className="h-10 border border-input rounded-md bg-background px-3 py-2 appearance-none pr-8 cursor-pointer"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'distance' | 'rating' | 'price')}
+          >
+            <option value="distance">الأقرب</option>
+            <option value="rating">التقييم</option>
+            <option value="price">السعر</option>
+          </select>
+          <Filter className="w-4 h-4 absolute top-3 left-2 text-gray-400 pointer-events-none" />
+        </div>
+      </div>
+
+      <div className="h-64 mb-4 rounded-lg overflow-hidden shadow-md">
         <GoogleMapComponent 
           markers={mapMarkers}
           onMarkerClick={handleMarkerClick}
+          highlightedMarkerId={selectedServiceId}
+          center={userLocation || { lat: 24.7136, lng: 46.6753 }}
         />
       </div>
 
@@ -136,10 +258,7 @@ const Explore = () => {
 
       <div className="mb-6">
         <div className="flex items-center mb-2">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 ml-1 text-gray-600">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-          </svg>
+          <MapPin className="w-5 h-5 ml-1 text-gray-600" />
           <span className="text-gray-700">الرياض، المملكة العربية السعودية</span>
         </div>
       </div>
@@ -147,20 +266,31 @@ const Explore = () => {
       <div className="mt-6">
         <h2 className="text-lg font-bold mb-4">مقدمي الخدمات القريبين</h2>
         <div className="grid grid-cols-1 gap-6">
-          {filteredServices.map((service) => (
-            <div key={service.id} id={`service-${service.id}`}>
-              <ServiceCard
-                id={service.id}
-                name={service.name}
-                location={service.location}
-                image={service.image}
-                rating={service.rating}
-                price={service.price}
-                priceUnit={service.priceUnit}
-                subtitle={service.distance}
-              />
+          {filteredServices.length > 0 ? (
+            filteredServices.map((service) => (
+              <div 
+                key={service.id} 
+                id={`service-${service.id}`}
+                className={`transition-all duration-300 ${selectedServiceId === service.id ? 'ring-2 ring-munaasib-red rounded-lg' : ''}`}
+                onClick={() => handleServiceCardClick(service.id)}
+              >
+                <ServiceCard
+                  id={service.id}
+                  name={service.name}
+                  location={service.location}
+                  image={service.image}
+                  rating={service.rating}
+                  price={service.price}
+                  priceUnit={service.priceUnit}
+                  subtitle={service.distance}
+                />
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-10 text-gray-500">
+              لا توجد نتائج مطابقة لبحثك
             </div>
-          ))}
+          )}
         </div>
       </div>
     </Layout>

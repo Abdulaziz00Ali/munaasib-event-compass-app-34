@@ -1,14 +1,40 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, MapPin, Clock, Users, Coffee, Utensils } from 'lucide-react';
+import { Star, MapPin, Clock, Users, Coffee, Utensils, Building2, Package, Filter, Search } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Badge } from "@/components/ui/badge";
 import ServiceCard from "@/components/ui/ServiceCard";
 import GoogleMapComponent from "@/components/GoogleMapComponent";
+import { Input } from "@/components/ui/input";
+import { toast } from '@/components/ui/sonner';
 
 const CategoryDetails = () => {
   const { category } = useParams<{ category: string }>();
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [sortBy, setSortBy] = useState<'rating' | 'price' | 'distance'>('distance');
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  
+  useEffect(() => {
+    // Try to get user location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        () => {
+          console.log("Unable to retrieve location");
+          // Use default location (Riyadh)
+          setUserLocation({ lat: 24.7136, lng: 46.6753 });
+        }
+      );
+    }
+  }, []);
   
   // Category-specific data with coordinates for Google Maps
   // In real implementation, this would come from Google Places API
@@ -24,11 +50,14 @@ const CategoryDetails = () => {
           location: 'الرياض',
           subtitle: 'كبسة • مندي • مشويات',
           price: 150,
+          priceUnit: 'ر.س',
           rating: 4.8,
           reviews: 128,
           image: 'https://source.unsplash.com/featured/?food,arabic',
           featured: true,
+          distance: '5.0 كم',
           position: { lat: 24.7136, lng: 46.6753 },
+          category: 'kitchens',
         },
         {
           id: '2',
@@ -36,10 +65,13 @@ const CategoryDetails = () => {
           location: 'الرياض',
           subtitle: 'رياني • كبسة • يمني',
           price: 130,
+          priceUnit: 'ر.س',
           rating: 4.7,
           reviews: 95,
           image: 'https://source.unsplash.com/featured/?food,dinner',
+          distance: '3.2 كم',
           position: { lat: 24.7246, lng: 46.6558 },
+          category: 'kitchens',
         },
         {
           id: '3',
@@ -47,10 +79,13 @@ const CategoryDetails = () => {
           location: 'الرياض',
           subtitle: 'كبسة • مندي • مشويات',
           price: 120,
+          priceUnit: 'ر.س',
           rating: 4.9,
           reviews: 156,
           image: 'https://source.unsplash.com/featured/?food,meat',
+          distance: '4.0 كم',
           position: { lat: 24.7048, lng: 46.6763 },
+          category: 'kitchens',
         },
         {
           id: '4',
@@ -58,10 +93,13 @@ const CategoryDetails = () => {
           location: 'الرياض',
           subtitle: 'مندي • معموص • سلايق',
           price: 140,
+          priceUnit: 'ر.س',
           rating: 4.6,
           reviews: 87,
           image: 'https://source.unsplash.com/featured/?food,buffet',
+          distance: '6.2 كم',
           position: { lat: 24.6941, lng: 46.6858 },
+          category: 'kitchens',
         },
       ],
     },
@@ -79,6 +117,7 @@ const CategoryDetails = () => {
           priceUnit: 'ر.س / ساعتين',
           rating: 4.9,
           reviews: 92,
+          distance: '3.5 كم',
           image: '/lovable-uploads/9e85d7d6-e814-4f7c-87d8-6f8c1a1fb9ad.png',
           additionalInfo: {
             duration: 'ساعتين',
@@ -86,6 +125,7 @@ const CategoryDetails = () => {
             drinks: ['قهوة عربية', 'شاي وتمر'],
           },
           position: { lat: 24.7336, lng: 46.7053 },
+          category: 'coffee',
         },
         {
           id: '2',
@@ -96,6 +136,7 @@ const CategoryDetails = () => {
           priceUnit: 'ر.س / ٤ ساعات',
           rating: 4.8,
           reviews: 245,
+          distance: '5.3 كم',
           image: 'https://source.unsplash.com/featured/?arabic,coffee',
           additionalInfo: {
             duration: '٤ ساعات',
@@ -103,6 +144,7 @@ const CategoryDetails = () => {
             drinks: ['قهوة عربية', 'شاي وتمر'],
           },
           position: { lat: 24.7146, lng: 46.6853 },
+          category: 'coffee',
         },
         {
           id: '3',
@@ -113,6 +155,7 @@ const CategoryDetails = () => {
           priceUnit: 'ر.س / ٥ ساعات',
           rating: 4.6,
           reviews: 189,
+          distance: '7.1 كم',
           image: 'https://source.unsplash.com/featured/?coffee,cups',
           additionalInfo: {
             duration: '٥ ساعات',
@@ -120,6 +163,7 @@ const CategoryDetails = () => {
             drinks: ['قهوة عربية', 'شاي وتمر'],
           },
           position: { lat: 24.6941, lng: 46.6768 },
+          category: 'coffee',
         },
       ],
     },
@@ -134,11 +178,13 @@ const CategoryDetails = () => {
           location: 'حي النرجس، الرياض',
           subtitle: 'تتسع لـ ٣٠٠ ضيف',
           price: 15000,
-          priceUnit: 'ريال / ليلة',
+          priceUnit: 'ر.س / ليلة',
           rating: 4.8,
           reviews: 254,
+          distance: '5.5 كم',
           image: 'https://source.unsplash.com/featured/?wedding,hall',
           position: { lat: 24.7336, lng: 46.6653 },
+          category: 'venues',
         },
         {
           id: '2',
@@ -146,11 +192,13 @@ const CategoryDetails = () => {
           location: 'حي العليا، الرياض',
           subtitle: 'تتسع لـ ٣٠٠ ضيف',
           price: 20000,
-          priceUnit: 'ريال / ليلة',
+          priceUnit: 'ر.س / ليلة',
           rating: 4.9,
           reviews: 189,
+          distance: '4.3 كم',
           image: 'https://source.unsplash.com/featured/?wedding,venue',
           position: { lat: 24.7046, lng: 46.6953 },
+          category: 'venues',
         },
         {
           id: '3',
@@ -158,11 +206,13 @@ const CategoryDetails = () => {
           location: 'حي الورود، الرياض',
           subtitle: 'تتسع لـ ١٥٠ ضيف',
           price: 12000,
-          priceUnit: 'ريال / ليلة',
+          priceUnit: 'ر.س / ليلة',
           rating: 4.7,
           reviews: 167,
+          distance: '7.9 كم',
           image: 'https://source.unsplash.com/featured/?wedding,decoration',
           position: { lat: 24.6841, lng: 46.6458 },
+          category: 'venues',
         },
       ],
     },
@@ -175,11 +225,15 @@ const CategoryDetails = () => {
           id: '1',
           name: 'باقة الإضاءة والديكور الذهبية',
           location: 'الرياض',
+          subtitle: 'تجهيزات كاملة',
           price: 800,
+          priceUnit: 'ر.س',
           rating: 4.8,
           reviews: 75,
+          distance: '3.7 كم',
           image: 'https://source.unsplash.com/featured/?decoration,wedding',
           position: { lat: 24.7236, lng: 46.6353 },
+          category: 'accessories',
         },
         {
           id: '2',
@@ -187,10 +241,13 @@ const CategoryDetails = () => {
           location: 'الرياض',
           subtitle: 'مؤسسة النور للإضاءة',
           price: 350,
+          priceUnit: 'ر.س',
           rating: 4.8,
           reviews: 120,
+          distance: '4.2 كم',
           image: 'https://source.unsplash.com/featured/?lights,pathway',
           position: { lat: 24.7146, lng: 46.6753 },
+          category: 'accessories',
         },
         {
           id: '3',
@@ -201,8 +258,10 @@ const CategoryDetails = () => {
           priceUnit: 'ريال للقطعة',
           rating: 4.9,
           reviews: 89,
+          distance: '5.8 كم',
           image: 'https://source.unsplash.com/featured/?gift,wrapped',
           position: { lat: 24.7036, lng: 46.6853 },
+          category: 'accessories',
         },
         {
           id: '4',
@@ -210,10 +269,13 @@ const CategoryDetails = () => {
           location: 'الرياض',
           subtitle: 'لمسات الإبداع',
           price: 600,
+          priceUnit: 'ر.س',
           rating: 4.7,
           reviews: 56,
+          distance: '6.4 كم',
           image: 'https://source.unsplash.com/featured/?entrance,decoration',
           position: { lat: 24.6936, lng: 46.6653 },
+          category: 'accessories',
         },
       ],
     },
@@ -230,29 +292,71 @@ const CategoryDetails = () => {
         return <Coffee className="w-5 h-5" />;
       case 'kitchens':
         return <Utensils className="w-5 h-5" />;
+      case 'halls':
+        return <Building2 className="w-5 h-5" />;
+      case 'addons':
+        return <Package className="w-5 h-5" />;
       default:
         return null;
     }
   };
   
-  // Filter data based on selected filter
-  const filteredProviders = selectedFilter === 'all' 
-    ? data.providers 
-    : data.providers.filter((provider: any) => 
-        provider.subtitle && provider.subtitle.includes(selectedFilter));
+  // Filter and sort data based on selected filter, search and sort
+  const filteredProviders = data.providers
+    .filter((provider: any) => {
+      // Filter by category filter option
+      const filterMatch = selectedFilter === 'all' || 
+                         (provider.subtitle && provider.subtitle.includes(selectedFilter));
+      
+      // Filter by search query
+      const searchMatch = !searchQuery || 
+                         provider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         provider.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (provider.subtitle && provider.subtitle.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      return filterMatch && searchMatch;
+    })
+    .sort((a: any, b: any) => {
+      switch (sortBy) {
+        case 'rating':
+          return b.rating - a.rating;
+        case 'price':
+          return a.price - b.price;
+        case 'distance':
+        default:
+          // Parse the distance value (assuming format like "5.0 كم")
+          const distanceA = parseFloat(a.distance.split(' ')[0]);
+          const distanceB = parseFloat(b.distance.split(' ')[0]);
+          return distanceA - distanceB;
+      }
+    });
 
   // Prepare markers for Google Maps
   const mapMarkers = filteredProviders.map((provider: any) => ({
     position: provider.position,
     title: provider.name,
-    id: provider.id
+    id: provider.id,
+    category: provider.category
   }));
 
   const handleMarkerClick = (markerId: string) => {
+    setSelectedServiceId(markerId);
+    
     // Scroll to the service when a marker is clicked
     const serviceElement = document.getElementById(`service-${markerId}`);
     if (serviceElement) {
       serviceElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  const handleServiceCardClick = (serviceId: string) => {
+    setSelectedServiceId(serviceId);
+    
+    // Find the service to get its position
+    const service = data.providers.find((s: any) => s.id === serviceId);
+    if (service) {
+      // You could add any additional logic here if needed
+      toast(`تم تحديد ${service.name} على الخريطة`);
     }
   };
   
@@ -278,15 +382,46 @@ const CategoryDetails = () => {
     <Layout title={data.title} showBack={true}>
       <div className="pb-20">
         <div className="bg-munaasib-lightGold p-4 rounded-lg mb-6">
-          <h2 className="text-xl font-bold mb-1">{data.title}</h2>
-          <p className="text-gray-700">{data.description}</p>
+          <div className="flex items-center gap-2">
+            {getCategoryIcon()}
+            <h2 className="text-xl font-bold">{data.title}</h2>
+          </div>
+          <p className="text-gray-700 mt-1">{data.description}</p>
+        </div>
+        
+        {/* Search and Sort */}
+        <div className="mb-4 flex gap-2">
+          <div className="relative flex-grow">
+            <Input
+              type="search"
+              placeholder="ابحث..."
+              className="pr-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <Search className="w-5 h-5 absolute top-2.5 right-3 text-gray-400" />
+          </div>
+          <div className="relative">
+            <select
+              className="h-10 border border-input rounded-md bg-background px-3 py-2 appearance-none pr-8 cursor-pointer"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'distance' | 'rating' | 'price')}
+            >
+              <option value="distance">الأقرب</option>
+              <option value="rating">التقييم</option>
+              <option value="price">السعر</option>
+            </select>
+            <Filter className="w-4 h-4 absolute top-3 left-2 text-gray-400 pointer-events-none" />
+          </div>
         </div>
         
         {/* Google Map */}
-        <div className="h-64 mb-4 rounded-lg overflow-hidden">
+        <div className="h-64 mb-4 rounded-lg overflow-hidden shadow-md">
           <GoogleMapComponent 
             markers={mapMarkers}
             onMarkerClick={handleMarkerClick}
+            highlightedMarkerId={selectedServiceId}
+            center={userLocation || { lat: 24.7136, lng: 46.6753 }}
           />
         </div>
         
@@ -306,15 +441,24 @@ const CategoryDetails = () => {
             </button>
           ))}
         </div>
+
+        {filteredProviders.length === 0 && (
+          <div className="text-center py-10 text-gray-500">
+            لا توجد نتائج مطابقة لبحثك
+          </div>
+        )}
         
-        {categoryKey === 'coffee' ? (
+        {categoryKey === 'coffee' && filteredProviders.length > 0 ? (
           // Special layout for coffee services with additional info
           <div className="space-y-4">
             {filteredProviders.map((provider: any) => (
               <div 
                 key={provider.id} 
                 id={`service-${provider.id}`}
-                className="bg-white rounded-lg shadow-sm overflow-hidden"
+                className={`bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 ${
+                  selectedServiceId === provider.id ? 'ring-2 ring-munaasib-red' : ''
+                }`}
+                onClick={() => handleServiceCardClick(provider.id)}
               >
                 <div className="relative">
                   <img
@@ -338,6 +482,8 @@ const CategoryDetails = () => {
                   <div className="flex items-center text-gray-600 mt-1">
                     <MapPin className="w-4 h-4 ml-1" />
                     <span className="text-sm">{provider.location}</span>
+                    <span className="mx-2 text-gray-400">•</span>
+                    <span className="text-sm text-gray-600">{provider.distance}</span>
                   </div>
                   {renderCoffeeServiceInfo(provider)}
                   <div className="flex items-center text-gray-600 mt-1">
@@ -360,11 +506,16 @@ const CategoryDetails = () => {
               </div>
             ))}
           </div>
-        ) : (
+        ) : filteredProviders.length > 0 ? (
           // Default layout for other categories
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {filteredProviders.map((provider: any) => (
-              <div key={provider.id} id={`service-${provider.id}`}>
+              <div 
+                key={provider.id} 
+                id={`service-${provider.id}`}
+                className={`transition-all duration-300 ${selectedServiceId === provider.id ? 'ring-2 ring-munaasib-red rounded-lg' : ''}`}
+                onClick={() => handleServiceCardClick(provider.id)}
+              >
                 <ServiceCard
                   id={provider.id}
                   name={provider.name}
@@ -378,7 +529,7 @@ const CategoryDetails = () => {
               </div>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
     </Layout>
   );
