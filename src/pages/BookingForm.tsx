@@ -1,15 +1,22 @@
 
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Calendar, Clock, MapPin } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const BookingForm = () => {
   const { id } = useParams<{ id: string }>();
-  const [date, setDate] = useState('');
+  const navigate = useNavigate();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState('');
-  const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
+  const [timeOptionsVisible, setTimeOptionsVisible] = useState(false);
   
   // Mock service data - in a real app, you would fetch based on the id
   const service = {
@@ -22,18 +29,47 @@ const BookingForm = () => {
     tax: 15, // 15%
   };
   
+  // Time slots available for selection
+  const timeSlots = [
+    '9:00 صباحاً', 
+    '10:00 صباحاً', 
+    '11:00 صباحاً', 
+    '12:00 ظهراً',
+    '1:00 مساءً', 
+    '2:00 مساءً', 
+    '3:00 مساءً', 
+    '4:00 مساءً', 
+    '5:00 مساءً', 
+    '6:00 مساءً', 
+    '7:00 مساءً', 
+    '8:00 مساءً', 
+    '9:00 مساءً'
+  ];
+  
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    console.log({
-      serviceId: id,
-      date,
-      time,
-      location,
-      notes,
-    });
     
     // In a real app, you would send this data to your backend
+    const bookingData = {
+      serviceId: id,
+      serviceName: service.name,
+      date: selectedDate ? format(selectedDate, 'dd/MM/yyyy', { locale: ar }) : '',
+      time,
+      location: service.location,
+      notes,
+      image: service.image,
+      status: 'pending',
+      title: 'حجز جديد',
+      venue: service.name,
+    };
+    
+    console.log(bookingData);
+    
+    // In a real app, you would save this booking in state or database
     alert('تم تأكيد الحجز بنجاح!');
+    
+    // Navigate to bookings page
+    navigate('/bookings');
   };
   
   const taxAmount = service.basePrice * (service.tax / 100);
@@ -64,52 +100,71 @@ const BookingForm = () => {
         <div className="space-y-6">
           <div>
             <label className="block font-medium mb-2">تاريخ المناسبة</label>
-            <div className="relative">
-              <div className="absolute top-3 right-3 text-gray-500">
-                <Calendar className="w-5 h-5" />
-              </div>
-              <input
-                type="text"
-                placeholder="اختر التاريخ"
-                className="w-full border border-gray-300 rounded-lg py-3 px-10"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-              />
-            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-right font-normal relative",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <div className="absolute top-3 right-3 text-gray-500">
+                    <CalendarIcon className="w-5 h-5" />
+                  </div>
+                  <span className="mr-8">
+                    {selectedDate ? format(selectedDate, 'dd MMMM yyyy', { locale: ar }) : "اختر التاريخ"}
+                  </span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  locale={ar}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
           
           <div>
             <label className="block font-medium mb-2">وقت المناسبة</label>
             <div className="relative">
-              <div className="absolute top-3 right-3 text-gray-500">
-                <Clock className="w-5 h-5" />
-              </div>
-              <input
-                type="text"
-                placeholder="اختر الوقت"
-                className="w-full border border-gray-300 rounded-lg py-3 px-10"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-          
-          <div>
-            <label className="block font-medium mb-2">موقع المناسبة</label>
-            <div className="relative">
-              <div className="absolute top-3 right-3 text-gray-500">
-                <MapPin className="w-5 h-5" />
-              </div>
-              <input
-                type="text"
-                placeholder="أدخل الموقع"
-                className="w-full border border-gray-300 rounded-lg py-3 px-10"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                required
-              />
+              <Button
+                type="button"
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-right font-normal relative",
+                  !time && "text-muted-foreground"
+                )}
+                onClick={() => setTimeOptionsVisible(!timeOptionsVisible)}
+              >
+                <div className="absolute top-3 right-3 text-gray-500">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <span className="mr-8">
+                  {time || "اختر الوقت"}
+                </span>
+              </Button>
+              
+              {timeOptionsVisible && (
+                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                  {timeSlots.map((slot) => (
+                    <button
+                      key={slot}
+                      type="button"
+                      className="block w-full text-right px-4 py-2 hover:bg-gray-100"
+                      onClick={() => {
+                        setTime(slot);
+                        setTimeOptionsVisible(false);
+                      }}
+                    >
+                      {slot}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           
@@ -142,7 +197,7 @@ const BookingForm = () => {
         
         <button
           type="submit"
-          className="w-full mt-6 bg-munaasib-red text-white py-3 rounded-lg font-bold hover:bg-munaasib-darkRed transition-colors"
+          className="w-full mt-6 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition-colors"
         >
           تأكيد الحجز
         </button>

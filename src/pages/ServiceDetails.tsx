@@ -92,7 +92,7 @@ const ServiceDetails = () => {
       },
     ],
     availableDates: ['15', '18', '20', '22'],
-    month: 'فبراير',
+    month: 'رمضان',
     reviews: [
       {
         id: '1',
@@ -303,10 +303,18 @@ const ServiceDetails = () => {
               {service.availableDates.map((date, index) => (
                 <button 
                   key={index} 
-                  className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col items-center min-w-[80px] hover:border-munaasib-red focus:outline-none focus:border-munaasib-red"
+                  className={`bg-white border rounded-lg p-4 flex flex-col items-center min-w-[80px] hover:border-munaasib-red focus:outline-none ${
+                    selectedDate && 
+                    selectedDate.getDate() === parseInt(date) &&
+                    format(selectedDate, 'MMMM', {locale: ar}) === service.month
+                      ? 'border-munaasib-red bg-munaasib-lightRed' 
+                      : 'border-gray-200'
+                  }`}
                   onClick={() => {
+                    // For demo purposes, we'll set this to the current year, adjust month for Ramadan
                     const thisYear = new Date().getFullYear();
-                    const dateObj = new Date(thisYear, 1, parseInt(date)); // فبراير هو الشهر رقم 1 في JS
+                    let monthIndex = 8; // Ramadan typically falls around month 9 (which is index 8)
+                    const dateObj = new Date(thisYear, monthIndex, parseInt(date)); 
                     setSelectedDate(dateObj);
                   }}
                 >
@@ -352,7 +360,7 @@ const ServiceDetails = () => {
         <div className="sticky bottom-20 left-0 right-0 bg-white pt-4 pb-4 mt-8">
           <Link
             to={`/booking/${id}`}
-            className="block w-full bg-munaasib-red text-white text-center py-3 rounded-lg font-bold hover:bg-munaasib-darkRed transition-colors"
+            className="block w-full bg-green-600 text-white text-center py-3 rounded-lg font-bold hover:bg-green-700 transition-colors"
           >
             احجز الآن
           </Link>
