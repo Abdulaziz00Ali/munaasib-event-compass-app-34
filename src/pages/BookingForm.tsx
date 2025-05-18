@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Calendar as CalendarIcon, Clock } from 'lucide-react';
@@ -8,13 +8,16 @@ import { ar } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 const BookingForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState('');
-  const [timeOptionsVisible, setTimeOptionsVisible] = useState(false);
+  const [timeOpen, setTimeOpen] = useState(false);
+  const [dateOpen, setDateOpen] = useState(false);
   const [notes, setNotes] = useState('');
   
   // Mock service data - in a real app, you would fetch based on the id
@@ -64,8 +67,12 @@ const BookingForm = () => {
     
     console.log(bookingData);
     
-    // In a real app, you would save this booking in state or database
-    alert('تم تأكيد الحجز بنجاح!');
+    // Show success toast
+    toast({
+      title: "تم تأكيد الحجز بنجاح!",
+      description: "يمكنك مراجعة تفاصيل الحجز في صفحة الحجوزات",
+      variant: "success",
+    });
     
     // Navigate to bookings page
     navigate('/bookings');
@@ -77,6 +84,18 @@ const BookingForm = () => {
       month: 'long',
       year: 'numeric'
     }).format(date);
+  };
+  
+  // Handle date selection and close the popover
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+    setDateOpen(false);
+  };
+  
+  // Handle time selection and close the popover
+  const handleTimeSelect = (selectedTime: string) => {
+    setTime(selectedTime);
+    setTimeOpen(false);
   };
   
   const taxAmount = service.basePrice * (service.tax / 100);
@@ -106,7 +125,7 @@ const BookingForm = () => {
         <div className="space-y-6">
           <div>
             <label className="block font-medium mb-2">تاريخ المناسبة</label>
-            <Popover>
+            <Popover open={dateOpen} onOpenChange={setDateOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -127,7 +146,7 @@ const BookingForm = () => {
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={setSelectedDate}
+                  onSelect={handleDateSelect}
                   locale={ar}
                 />
               </PopoverContent>
@@ -137,7 +156,7 @@ const BookingForm = () => {
           <div>
             <label className="block font-medium mb-2">وقت المناسبة</label>
             <div className="relative">
-              <Popover>
+              <Popover open={timeOpen} onOpenChange={setTimeOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -161,9 +180,7 @@ const BookingForm = () => {
                         key={slot}
                         variant="ghost"
                         className="justify-start font-normal"
-                        onClick={() => {
-                          setTime(slot);
-                        }}
+                        onClick={() => handleTimeSelect(slot)}
                       >
                         {slot}
                       </Button>
@@ -192,7 +209,7 @@ const BookingForm = () => {
             <span>{service.basePrice} ريال</span>
           </div>
           <div className="flex justify-between mb-2">
-            <span>الضريبة ({service.tax}%)</span>
+            <span>ضريبة القيمة المضافة ({service.tax}%)</span>
             <span>{taxAmount} ريال</span>
           </div>
           <div className="flex justify-between font-bold mt-3 pt-3 border-t">

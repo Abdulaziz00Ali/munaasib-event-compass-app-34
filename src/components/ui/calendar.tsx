@@ -62,14 +62,14 @@ function Calendar({
       ISOWeek={true}
       formatters={{
         // Custom formatters for Hijri calendar
-        formatCaption: (date, options) => {
+        formatCaption: (date) => {
           // Format to Arabic month name and year
           return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', { 
             month: 'long',
             year: 'numeric'
           }).format(date);
         },
-        formatWeekdayName: (weekday, options) => {
+        formatWeekdayName: (weekday) => {
           return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', { 
             weekday: 'short' 
           }).format(new Date(weekday.getFullYear(), weekday.getMonth(), weekday.getDate() + weekday.getDay()));

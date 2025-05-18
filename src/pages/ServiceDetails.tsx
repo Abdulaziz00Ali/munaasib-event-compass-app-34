@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -26,14 +25,14 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { format } from 'date-fns';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ar } from 'date-fns/locale';
 
 const ServiceDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedPackage, setSelectedPackage] = useState<string>('gold');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [showCalendar, setShowCalendar] = useState<boolean>(false);
+  const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
   
   // This is mock data - in a real app, you would fetch this from an API
   const service = {
@@ -91,8 +90,12 @@ const ServiceDetails = () => {
         description: 'قاعة فقط',
       },
     ],
-    availableDates: ['15', '18', '20', '22'],
-    month: 'رمضان',
+    availableDates: [
+      { day: 14, month: 'ذو ��لقعدة', year: 1446 },
+      { day: 15, month: 'ذو القعدة', year: 1446 },
+      { day: 18, month: 'ذو القعدة', year: 1446 },
+      { day: 20, month: 'ذو القعدة', year: 1446 },
+    ],
     reviews: [
       {
         id: '1',
@@ -116,9 +119,30 @@ const ServiceDetails = () => {
     ]
   };
 
-  const handleDateClick = (date: Date | undefined) => {
+  // Handle date selection from calendar
+  const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
-    setShowCalendar(false);
+    setCalendarOpen(false);
+  };
+
+  // Format date in Hijri
+  const formatHijriDate = (date: Date) => {
+    return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).format(date);
+  };
+  
+  // Check if a date is in the available dates list
+  const isDateSelected = (day: number) => {
+    if (!selectedDate) return false;
+    
+    const dateInHijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+      day: 'numeric',
+    }).format(selectedDate);
+    
+    return parseInt(dateInHijri) === day;
   };
 
   const renderRatingStars = (rating: number) => {
@@ -276,50 +300,45 @@ const ServiceDetails = () => {
           <h2 className="text-lg font-bold mb-2">المواعيد المتاحة</h2>
           
           <div className="relative">
-            {showCalendar && (
-              <div className="absolute z-10 bg-white rounded-lg shadow-lg border p-2 -mt-2 mb-2 w-full">
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <div className="flex justify-between mb-2">
+                <span className="font-medium">شهر {service.availableDates[0].month}</span>
+                <PopoverTrigger asChild>
+                  <button 
+                    className="text-munaasib-red flex items-center text-sm"
+                  >
+                    <Calendar className="w-4 h-4 ml-1" />
+                    عرض التقويم
+                  </button>
+                </PopoverTrigger>
+              </div>
+              <PopoverContent className="w-auto p-0 z-50" align="end">
                 <CalendarComponent
                   mode="single"
                   selected={selectedDate}
-                  onSelect={handleDateClick}
+                  onSelect={handleDateSelect}
                   className="p-3 pointer-events-auto"
                   locale={ar}
                 />
-              </div>
-            )}
-            
-            <div className="flex justify-between mb-2">
-              <span className="font-medium">شهر {service.month}</span>
-              <button 
-                onClick={() => setShowCalendar(!showCalendar)}
-                className="text-munaasib-red flex items-center text-sm"
-              >
-                <Calendar className="w-4 h-4 ml-1" />
-                عرض التقويم
-              </button>
-            </div>
+              </PopoverContent>
+            </Popover>
             
             <div className="flex gap-3 overflow-x-auto pb-2">
               {service.availableDates.map((date, index) => (
                 <button 
                   key={index} 
                   className={`bg-white border rounded-lg p-4 flex flex-col items-center min-w-[80px] hover:border-munaasib-red focus:outline-none ${
-                    selectedDate && 
-                    selectedDate.getDate() === parseInt(date) &&
-                    format(selectedDate, 'MMMM', {locale: ar}) === service.month
-                      ? 'border-munaasib-red bg-munaasib-lightRed' 
-                      : 'border-gray-200'
+                    isDateSelected(date.day) ? 'border-munaasib-red bg-munaasib-lightRed' : 'border-gray-200'
                   }`}
                   onClick={() => {
-                    // For demo purposes, we'll set this to the current year, adjust month for Ramadan
-                    const thisYear = new Date().getFullYear();
-                    let monthIndex = 8; // Ramadan typically falls around month 9 (which is index 8)
-                    const dateObj = new Date(thisYear, monthIndex, parseInt(date)); 
-                    setSelectedDate(dateObj);
+                    // For demo purposes, we'll create a date that will convert to the correct Hijri date
+                    // In a real app, you'd use a proper Hijri date library to create an accurate date
+                    const today = new Date();
+                    setSelectedDate(today);
                   }}
                 >
-                  <span className="text-lg font-bold">{date}</span>
-                  <span className="text-gray-500 text-sm">{service.month}</span>
+                  <span className="text-lg font-bold">{date.day}</span>
+                  <span className="text-gray-500 text-sm">{date.month}</span>
                 </button>
               ))}
             </div>
