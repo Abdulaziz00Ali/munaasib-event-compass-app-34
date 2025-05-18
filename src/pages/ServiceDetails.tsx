@@ -2,11 +2,38 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Share } from 'lucide-react';
+import { Share, Calendar, Star, MapPin, StarHalf, StarOff } from 'lucide-react';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableRow 
+} from '@/components/ui/table';
+import {
+  Card,
+  CardContent
+} from '@/components/ui/card';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '@/components/ui/tabs';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from '@/components/ui/accordion';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 const ServiceDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedPackage, setSelectedPackage] = useState<string>('gold');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [showCalendar, setShowCalendar] = useState<boolean>(false);
   
   // This is mock data - in a real app, you would fetch this from an API
   const service = {
@@ -17,6 +44,33 @@ const ServiceDetails = () => {
     rating: 4.8,
     reviewCount: 236,
     description: 'نقدم خدمات تنظيم حفلات الزفاف والمناسبات بأعلى مستويات الجودة والفخامة. متخصصون في الضيافة السعودية الأصيلة مع لمسات عصرية.',
+    classification: 'قاعات أفراح',
+    capacity: '500 ضيف',
+    basePrice: 5000,
+    features: [
+      { 
+        name: 'ضيافة فاخرة', 
+        icon: '✨',
+        description: 'نقدم خدمات ضيافة متكاملة مع أرقى أنواع المشروبات والحلويات'
+      },
+      { 
+        name: 'إضاءة احترافية', 
+        icon: '💡',
+        description: 'أنظمة إضاءة متطورة مع خيارات متعددة للألوان والتأثيرات'
+      },
+      { 
+        name: 'تنظيم كامل', 
+        icon: '👥',
+        description: 'فريق متكامل من المنظمين والمنسقين لإدارة الحفل من البداية للنهاية'
+      },
+      { 
+        name: 'ركن سيارات', 
+        icon: '🚗',
+        description: 'خدمة صف السيارات متوفرة لجميع الضيوف'
+      }
+    ],
+    providesFullService: true,
+    fullServiceDetails: 'القاعة متكفلة بتوفير خدمات القهوجية والمطبخ بشكل كامل، مع إمكانية إضافة خدمات إضافية حسب الطلب.',
     packages: [
       {
         id: 'gold',
@@ -37,7 +91,52 @@ const ServiceDetails = () => {
         description: 'قاعة فقط',
       },
     ],
-    availableDates: ['25 فبراير', '26 فبراير', '28 فبراير'],
+    availableDates: ['15', '18', '20', '22'],
+    month: 'فبراير',
+    reviews: [
+      {
+        id: '1',
+        name: 'أحمد محمد',
+        rating: 5,
+        date: 'قبل 3 أيام',
+        comment: 'خدمة ممتازة وتنظيم رائع للحفل'
+      },
+      {
+        id: '2',
+        name: 'سارة عبدالله',
+        rating: 4,
+        date: 'قبل أسبوع',
+        comment: 'تجربة جميلة وموقع مميز'
+      }
+    ],
+    gallery: [
+      'https://source.unsplash.com/featured/?wedding,hall,luxury',
+      'https://source.unsplash.com/featured/?wedding,decoration',
+      'https://source.unsplash.com/featured/?wedding,cake'
+    ]
+  };
+
+  const handleDateClick = (date: Date | undefined) => {
+    setSelectedDate(date);
+    setShowCalendar(false);
+  };
+
+  const renderRatingStars = (rating: number) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5;
+    
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(<Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />);
+      } else if (i === fullStars && halfStar) {
+        stars.push(<StarHalf key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />);
+      } else {
+        stars.push(<StarOff key={i} className="w-5 h-5 text-gray-300" />);
+      }
+    }
+    
+    return stars;
   };
 
   return (
@@ -63,28 +162,73 @@ const ServiceDetails = () => {
       </div>
       
       <div className="px-4">
-        <div className="flex justify-between items-start mt-4">
-          <div>
-            <div className="flex items-center">
-              <span className="text-yellow-500 mr-1">★</span>
-              <span className="font-semibold">{service.rating}</span>
-              <span className="text-gray-500 mr-1">({service.reviewCount} تقييم)</span>
-            </div>
-            <h1 className="text-2xl font-bold mt-1">{service.name}</h1>
-            <div className="flex items-center text-gray-600 mt-1">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 ml-1">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-              </svg>
-              {service.location}
-            </div>
-          </div>
+        {/* Service Header with Rating */}
+        <div className="mt-4">
+          <h1 className="text-2xl font-bold">{service.name}</h1>
           
-          <div className="bg-munaasib-red text-white px-3 py-1 rounded-lg">
-            <span className="text-sm font-medium">موثَّق</span>
+          <div className="flex items-center justify-between mt-2">
+            <div>
+              <Link to={`/reviews/${id}`} className="flex items-center">
+                <div className="flex items-center">
+                  {renderRatingStars(service.rating)}
+                  <span className="font-semibold mr-1">{service.rating}</span>
+                  <span className="text-gray-500">({service.reviewCount} تقييم)</span>
+                </div>
+              </Link>
+              <div className="flex items-center text-gray-600 mt-1">
+                <MapPin className="w-4 h-4 ml-1" />
+                {service.location}
+              </div>
+            </div>
+            
+            <div className="bg-green-500 text-white px-3 py-1 rounded-lg">
+              <span className="text-sm font-medium">متاح حالياً</span>
+            </div>
           </div>
         </div>
         
+        {/* Service Details Table */}
+        <div className="mt-6">
+          <h2 className="text-lg font-bold mb-2">تفاصيل المكان</h2>
+          <Table>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-bold w-1/3">التصنيف</TableCell>
+                <TableCell>{service.classification}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-bold">السعة</TableCell>
+                <TableCell>{service.capacity}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-bold">السعر يبدأ من</TableCell>
+                <TableCell className="text-munaasib-red font-bold">{service.basePrice.toLocaleString()} ريال</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Service Features */}
+        <div className="mt-6">
+          <h2 className="text-lg font-bold mb-3">الميزات</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {service.features.map((feature, index) => (
+              <Card key={index} className="border-gray-200">
+                <CardContent className="flex flex-col items-center p-4">
+                  <div className="text-2xl mb-2">{feature.icon}</div>
+                  <div className="text-center font-medium">{feature.name}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="mt-4 bg-munaasib-lightGold border border-munaasib-gold p-4 rounded-lg">
+            <h3 className="font-bold mb-1">تنظيم متكامل</h3>
+            <p className="text-gray-700">{service.fullServiceDetails}</p>
+          </div>
+        </div>
+        
+        {/* Packages and Pricing */}
         <div className="mt-6">
           <h2 className="text-lg font-bold mb-2">الباقات والأسعار</h2>
           <div className="space-y-4">
@@ -108,26 +252,98 @@ const ServiceDetails = () => {
           </div>
         </div>
         
+        {/* Photo Gallery */}
         <div className="mt-6">
-          <h2 className="text-lg font-bold mb-2">المواعيد المتاحة</h2>
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg font-bold">معرض الصور</h2>
+            <Link to={`/gallery/${id}`} className="text-munaasib-red text-sm">عرض الكل</Link>
+          </div>
           <div className="flex gap-2 overflow-x-auto pb-2">
-            {service.availableDates.map((date, index) => (
-              <div 
-                key={index} 
-                className="bg-white border border-gray-200 rounded-lg p-3 flex flex-col items-center min-w-[100px]"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-munaasib-red">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
-                </svg>
-                <span className="mt-1">{date}</span>
-                <span className="text-gray-500 text-sm">مساءً</span>
+            {service.gallery.map((image, index) => (
+              <div key={index} className="min-w-[150px] h-[100px]">
+                <img 
+                  src={image} 
+                  alt={`صورة ${index + 1}`}
+                  className="w-full h-full object-cover rounded-lg"
+                />
               </div>
             ))}
           </div>
         </div>
         
+        {/* Available Dates */}
+        <div className="mt-6">
+          <h2 className="text-lg font-bold mb-2">المواعيد المتاحة</h2>
+          
+          <div className="relative">
+            {showCalendar && (
+              <div className="absolute z-10 bg-white rounded-lg shadow-lg border p-2 -mt-2 mb-2 w-full">
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={handleDateClick}
+                  className="p-3 pointer-events-auto"
+                  locale={ar}
+                />
+              </div>
+            )}
+            
+            <div className="flex justify-between mb-2">
+              <span className="font-medium">شهر {service.month}</span>
+              <button 
+                onClick={() => setShowCalendar(!showCalendar)}
+                className="text-munaasib-red flex items-center text-sm"
+              >
+                <Calendar className="w-4 h-4 ml-1" />
+                عرض التقويم
+              </button>
+            </div>
+            
+            <div className="flex gap-3 overflow-x-auto pb-2">
+              {service.availableDates.map((date, index) => (
+                <button 
+                  key={index} 
+                  className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col items-center min-w-[80px] hover:border-munaasib-red focus:outline-none focus:border-munaasib-red"
+                  onClick={() => {
+                    const thisYear = new Date().getFullYear();
+                    const dateObj = new Date(thisYear, 1, parseInt(date)); // فبراير هو الشهر رقم 1 في JS
+                    setSelectedDate(dateObj);
+                  }}
+                >
+                  <span className="text-lg font-bold">{date}</span>
+                  <span className="text-gray-500 text-sm">{service.month}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        {/* Reviews */}
+        <div className="mt-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-bold">التقييمات والآراء</h2>
+            <Link to={`/reviews/${id}`} className="text-munaasib-red text-sm">عرض الكل</Link>
+          </div>
+          
+          <div className="mt-4 space-y-4">
+            {service.reviews.map(review => (
+              <div key={review.id} className="border-b border-gray-100 pb-4">
+                <div className="flex justify-between">
+                  <div className="font-bold">{review.name}</div>
+                  <div className="text-gray-500 text-sm">{review.date}</div>
+                </div>
+                <div className="flex items-center mt-1">
+                  {renderRatingStars(review.rating)}
+                </div>
+                <p className="text-gray-700 mt-2">{review.comment}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Service Description */}
         <div className="border-t border-gray-200 mt-6 pt-6">
-          <h2 className="text-lg font-bold mb-2">تفاصيل الخدمة</h2>
+          <h2 className="text-lg font-bold mb-2">عن المكان</h2>
           <p className="text-gray-700 leading-relaxed">
             {service.description}
           </p>
