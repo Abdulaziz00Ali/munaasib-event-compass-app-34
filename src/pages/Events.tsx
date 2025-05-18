@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, MapPin, Utensils, Coffee, Building2, Package, Filter, Search } from 'lucide-react';
@@ -14,6 +13,43 @@ import CategoryCard from '@/components/ui/CategoryCard';
 import GoogleMapComponent from '@/components/GoogleMapComponent';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
+
+// Define types for our different items
+type FeaturedHall = {
+  id: string;
+  title: string;
+  location: string;
+  image: string;
+  category: string;
+  position: { lat: number, lng: number };
+  mapCategory: string;
+  distance: string;
+  rating: number;
+  price: number;
+  priceUnit: string;
+};
+
+type SpecialOffer = {
+  id: string;
+  name: string;
+  discount: string;
+  description: string;
+  image: string;
+  position: { lat: number, lng: number };
+  mapCategory: string;
+  distance: string;
+};
+
+type EventPackage = {
+  id: string;
+  name: string;
+  price: string;
+  description: string;
+  image: string;
+  position: { lat: number, lng: number };
+  mapCategory: string;
+  distance: string;
+};
 
 const Events = () => {
   const [selectedVenue, setSelectedVenue] = useState<string | null>(null);
@@ -75,7 +111,7 @@ const Events = () => {
     },
   ];
 
-  const featuredHalls = [
+  const featuredHalls: FeaturedHall[] = [
     {
       id: '1',
       title: 'قاعة الملكية',
@@ -104,7 +140,7 @@ const Events = () => {
     },
   ];
 
-  const specialOffers = [
+  const specialOffers: SpecialOffer[] = [
     {
       id: '1',
       name: 'عرض نهاية الأسبوع',
@@ -127,7 +163,7 @@ const Events = () => {
     },
   ];
 
-  const eventPackages = [
+  const eventPackages: EventPackage[] = [
     {
       id: '1',
       name: 'باقة الزفاف الملكي',
@@ -207,26 +243,45 @@ const Events = () => {
       // Toast to indicate which item was selected
       const itemDetails = getItemDetailsById(markerId);
       if (itemDetails) {
-        toast(`تم تحديد ${itemDetails.name || itemDetails.title} على الخريطة`);
+        toast(`تم تحديد ${itemDetails.displayName} على الخريطة`);
       }
     }
   };
   
-  // Helper function to get item details by ID
+  // Helper function to get item details by ID, with proper type handling
   const getItemDetailsById = (id: string) => {
     if (id.startsWith('offer-')) {
       const offerId = id.replace('offer-', '');
-      return specialOffers.find(offer => offer.id === offerId);
+      const offer = specialOffers.find(offer => offer.id === offerId);
+      return offer ? {
+        displayName: offer.name, // Use name for offers
+        ...offer
+      } : null;
     } else if (id.startsWith('package-')) {
       const packageId = id.replace('package-', '');
-      return eventPackages.find(pkg => pkg.id === packageId);
+      const pkg = eventPackages.find(pkg => pkg.id === packageId);
+      return pkg ? {
+        displayName: pkg.name, // Use name for packages
+        ...pkg
+      } : null;
     } else {
-      return featuredHalls.find(hall => hall.id === id);
+      const hall = featuredHalls.find(hall => hall.id === id);
+      return hall ? {
+        displayName: hall.title, // Use title for halls
+        ...hall
+      } : null;
     }
   };
 
   const handleItemClick = (id: string) => {
     setSelectedVenue(id);
+    
+    // Find the service to get its position
+    const itemDetails = getItemDetailsById(id);
+    if (itemDetails) {
+      // Display toast with the correct property name
+      toast(`تم تحديد ${itemDetails.displayName} على الخريطة`);
+    }
   };
 
   return (
