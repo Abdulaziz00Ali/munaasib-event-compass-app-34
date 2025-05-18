@@ -59,6 +59,27 @@ function Calendar({
         IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
       }}
       locale={locale}
+      ISOWeek={true}
+      formatters={{
+        // Custom formatters for Hijri calendar
+        formatCaption: (date, options) => {
+          // Format to Arabic month name and year
+          return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', { 
+            month: 'long',
+            year: 'numeric'
+          }).format(date);
+        },
+        formatWeekdayName: (weekday, options) => {
+          return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', { 
+            weekday: 'short' 
+          }).format(new Date(weekday.getFullYear(), weekday.getMonth(), weekday.getDate() + weekday.getDay()));
+        },
+        formatDay: (day) => {
+          return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', { 
+            day: 'numeric' 
+          }).format(day);
+        }
+      }}
       {...props}
     />
   );

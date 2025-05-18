@@ -2,11 +2,13 @@
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import BookingCard from '@/components/ui/BookingCard';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 
 const Bookings = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
-
-  const upcomingBookings = [
+  const [upcomingBookingsList, setUpcomingBookingsList] = useState([
     {
       id: '1',
       title: 'حفل زفاف تقليدي',
@@ -37,9 +39,9 @@ const Bookings = () => {
       image: 'https://source.unsplash.com/featured/?conference,business',
       status: 'confirmed' as const,
     },
-  ];
+  ]);
 
-  const pastBookings = [
+  const [pastBookingsList, setPastBookingsList] = useState([
     {
       id: '4',
       title: 'اجتماع عمل',
@@ -60,16 +62,29 @@ const Bookings = () => {
       image: 'https://source.unsplash.com/featured/?graduation,ceremony',
       status: 'confirmed' as const,
     },
-  ];
+  ]);
   
   const handleEditBooking = (id: string) => {
-    // Handle edit booking
+    // Navigation to edit page is now handled in the BookingCard component
     console.log('Editing booking:', id);
   };
   
   const handleCancelBooking = (id: string) => {
     // Handle cancel booking
     console.log('Canceling booking:', id);
+    
+    // Update the state to remove the canceled booking
+    if (activeTab === 'upcoming') {
+      setUpcomingBookingsList(prev => prev.filter(booking => booking.id !== id));
+    } else {
+      setPastBookingsList(prev => prev.filter(booking => booking.id !== id));
+    }
+    
+    // Show toast notification
+    toast({
+      title: "تم إلغاء الحجز",
+      description: "تم إلغاء الحجز بنجاح",
+    });
   };
 
   return (
@@ -99,8 +114,8 @@ const Bookings = () => {
 
       <div className="mt-4">
         {activeTab === 'upcoming' ? (
-          upcomingBookings.length > 0 ? (
-            upcomingBookings.map((booking) => (
+          upcomingBookingsList.length > 0 ? (
+            upcomingBookingsList.map((booking) => (
               <BookingCard
                 key={booking.id}
                 {...booking}
@@ -113,8 +128,8 @@ const Bookings = () => {
               <p className="text-gray-500">لا توجد حجوزات قادمة</p>
             </div>
           )
-        ) : pastBookings.length > 0 ? (
-          pastBookings.map((booking) => (
+        ) : pastBookingsList.length > 0 ? (
+          pastBookingsList.map((booking) => (
             <BookingCard
               key={booking.id}
               {...booking}

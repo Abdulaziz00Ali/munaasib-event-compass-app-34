@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 type BookingCardProps = {
   id: string;
@@ -26,6 +27,8 @@ const BookingCard: React.FC<BookingCardProps> = ({
   onEdit,
   onCancel,
 }) => {
+  const navigate = useNavigate();
+  
   const statusText = {
     confirmed: 'مؤكد',
     pending: 'قيد المعالجة',
@@ -36,6 +39,18 @@ const BookingCard: React.FC<BookingCardProps> = ({
     confirmed: 'status-confirmed',
     pending: 'status-pending',
     cancelled: 'bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-sm font-medium',
+  };
+  
+  const handleEdit = () => {
+    onEdit(id);
+    // Navigate to the booking form with the booking id
+    navigate(`/booking/${id}`);
+  };
+  
+  const handleCancel = () => {
+    if (window.confirm('هل أنت متأكد من إلغاء هذا الحجز؟')) {
+      onCancel(id);
+    }
   };
 
   return (
@@ -72,16 +87,16 @@ const BookingCard: React.FC<BookingCardProps> = ({
       
       <div className="flex justify-between mt-4">
         <button 
-          onClick={() => onEdit(id)} 
+          onClick={handleEdit} 
           className="bg-munaasib-gold text-white py-2 px-6 rounded-lg hover:bg-munaasib-darkGold transition-colors duration-200"
         >
           تعديل الحجز
         </button>
         <button 
-          onClick={() => onCancel(id)} 
+          onClick={handleCancel} 
           className="border border-gray-300 text-gray-700 py-2 px-6 rounded-lg hover:bg-gray-100 transition-colors duration-200"
         >
-          إلغاء
+          إلغاء الحجز
         </button>
       </div>
     </div>

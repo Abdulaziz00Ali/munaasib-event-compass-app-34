@@ -2,9 +2,8 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Calendar as CalendarIcon, Clock, MapPin } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
@@ -15,8 +14,8 @@ const BookingForm = () => {
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState('');
-  const [notes, setNotes] = useState('');
   const [timeOptionsVisible, setTimeOptionsVisible] = useState(false);
+  const [notes, setNotes] = useState('');
   
   // Mock service data - in a real app, you would fetch based on the id
   const service = {
@@ -53,7 +52,7 @@ const BookingForm = () => {
     const bookingData = {
       serviceId: id,
       serviceName: service.name,
-      date: selectedDate ? format(selectedDate, 'dd/MM/yyyy', { locale: ar }) : '',
+      date: selectedDate ? formatHijriDate(selectedDate) : '',
       time,
       location: service.location,
       notes,
@@ -70,6 +69,14 @@ const BookingForm = () => {
     
     // Navigate to bookings page
     navigate('/bookings');
+  };
+
+  const formatHijriDate = (date: Date) => {
+    return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).format(date);
   };
   
   const taxAmount = service.basePrice * (service.tax / 100);
@@ -90,7 +97,6 @@ const BookingForm = () => {
           </div>
           <h2 className="font-bold text-lg">{service.name}</h2>
           <div className="flex items-center text-gray-600 text-sm mt-1">
-            <MapPin className="w-4 h-4 ml-1" />
             {service.location}
           </div>
         </div>
@@ -113,7 +119,7 @@ const BookingForm = () => {
                     <CalendarIcon className="w-5 h-5" />
                   </div>
                   <span className="mr-8">
-                    {selectedDate ? format(selectedDate, 'dd MMMM yyyy', { locale: ar }) : "اختر التاريخ"}
+                    {selectedDate ? formatHijriDate(selectedDate) : "اختر التاريخ"}
                   </span>
                 </Button>
               </PopoverTrigger>
@@ -131,40 +137,40 @@ const BookingForm = () => {
           <div>
             <label className="block font-medium mb-2">وقت المناسبة</label>
             <div className="relative">
-              <Button
-                type="button"
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-right font-normal relative",
-                  !time && "text-muted-foreground"
-                )}
-                onClick={() => setTimeOptionsVisible(!timeOptionsVisible)}
-              >
-                <div className="absolute top-3 right-3 text-gray-500">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <span className="mr-8">
-                  {time || "اختر الوقت"}
-                </span>
-              </Button>
-              
-              {timeOptionsVisible && (
-                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
-                  {timeSlots.map((slot) => (
-                    <button
-                      key={slot}
-                      type="button"
-                      className="block w-full text-right px-4 py-2 hover:bg-gray-100"
-                      onClick={() => {
-                        setTime(slot);
-                        setTimeOptionsVisible(false);
-                      }}
-                    >
-                      {slot}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-right font-normal relative",
+                      !time && "text-muted-foreground"
+                    )}
+                  >
+                    <div className="absolute top-3 right-3 text-gray-500">
+                      <Clock className="w-5 h-5" />
+                    </div>
+                    <span className="mr-8">
+                      {time || "اختر الوقت"}
+                    </span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 max-h-60 overflow-auto" align="start">
+                  <div className="grid grid-cols-1 gap-1 p-2">
+                    {timeSlots.map((slot) => (
+                      <Button
+                        key={slot}
+                        variant="ghost"
+                        className="justify-start font-normal"
+                        onClick={() => {
+                          setTime(slot);
+                        }}
+                      >
+                        {slot}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
           
