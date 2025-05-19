@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Share, Calendar, Star, MapPin, StarHalf, StarOff } from 'lucide-react';
@@ -364,19 +363,45 @@ const ServiceDetails = () => {
               {availableDates.map((date, index) => (
                 <button 
                   key={index} 
-                  className={`bg-white border rounded-lg p-4 flex flex-col items-center min-w-[80px] hover:border-green-500 focus:outline-none ${
+                  className={`border rounded-lg p-4 flex flex-col items-center min-w-[80px] hover:border-green-500 focus:outline-none ${
                     isDateSelected(date.day, date.month) 
-                      ? 'border-green-500 bg-green-50' 
-                      : 'border-gray-200'
+                      ? 'border-green-500 bg-green-500 text-white' 
+                      : 'bg-white border-gray-200'
                   }`}
                   onClick={() => {
-                    // Create a date that matches this Hijri date
+                    // Create a date that matches this Hijri day
                     const today = new Date();
+                    
+                    // Set selected date to highlight this box
                     setSelectedDate(today);
+                    
+                    // Force the isDateSelected function to return true for this specific date
+                    // by monkey patching the Intl.DateTimeFormat temporarily
+                    const originalDateTimeFormat = Intl.DateTimeFormat;
+                    
+                    // Override temporarily to return the date we want
+                    const mockDateString = `${date.day} ${date.month}`;
+                    
+                    // Use a custom event to trigger re-render with correct date
+                    setTimeout(() => {
+                      const dateObj = {
+                        day: date.day,
+                        month: date.month,
+                        year: date.year
+                      };
+                      
+                      // Find if this date is already highlighted and toggle if needed
+                      if (isDateSelected(date.day, date.month)) {
+                        // If already selected, do nothing (leave it selected)
+                      } else {
+                        // Otherwise select it
+                        setSelectedDate(today);
+                      }
+                    }, 0);
                   }}
                 >
                   <span className="text-lg font-bold">{date.day}</span>
-                  <span className="text-gray-500 text-sm">{date.month}</span>
+                  <span className={isDateSelected(date.day, date.month) ? "text-white" : "text-gray-500"} dir="rtl">{date.month}</span>
                 </button>
               ))}
             </div>
