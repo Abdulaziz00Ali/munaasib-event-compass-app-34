@@ -125,7 +125,7 @@ const ServiceDetails = () => {
     setSelectedDate(date);
     setCalendarOpen(false);
     
-    // If date is selected, check if it's already in available dates
+    // If date is selected, add it to available dates if not already there
     if (date) {
       const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
         day: 'numeric',
@@ -362,46 +362,42 @@ const ServiceDetails = () => {
             <div className="flex gap-3 overflow-x-auto pb-2">
               {availableDates.map((date, index) => (
                 <button 
-                  key={index} 
+                  key={`${date.day}-${date.month}-${index}`}
                   className={`border rounded-lg p-4 flex flex-col items-center min-w-[80px] hover:border-green-500 focus:outline-none ${
                     isDateSelected(date.day, date.month) 
                       ? 'border-green-500 bg-green-500 text-white' 
                       : 'bg-white border-gray-200'
                   }`}
                   onClick={() => {
-                    // Create a date that matches this Hijri day
+                    // First create a valid date object we can work with
                     const today = new Date();
                     
-                    // Set selected date to highlight this box
+                    // Set this date object as the selected date
                     setSelectedDate(today);
                     
-                    // Force the isDateSelected function to return true for this specific date
-                    // by monkey patching the Intl.DateTimeFormat temporarily
-                    const originalDateTimeFormat = Intl.DateTimeFormat;
+                    // We need to override the Hijri date check temporarily
+                    // to make this date appear selected
+                    const originalFormatMethod = Intl.DateTimeFormat.prototype.format;
                     
-                    // Override temporarily to return the date we want
-                    const mockDateString = `${date.day} ${date.month}`;
+                    // Replace the format method temporarily to return our date
+                    Intl.DateTimeFormat.prototype.format = function() {
+                      return `${date.day} ${date.month}`;
+                    };
                     
-                    // Use a custom event to trigger re-render with correct date
+                    // Check if it's selected and update to force re-render
                     setTimeout(() => {
-                      const dateObj = {
-                        day: date.day,
-                        month: date.month,
-                        year: date.year
-                      };
-                      
-                      // Find if this date is already highlighted and toggle if needed
-                      if (isDateSelected(date.day, date.month)) {
-                        // If already selected, do nothing (leave it selected)
-                      } else {
-                        // Otherwise select it
-                        setSelectedDate(today);
-                      }
-                    }, 0);
+                      // Reset the format method back to original
+                      Intl.DateTimeFormat.prototype.format = originalFormatMethod;
+                    }, 100);
                   }}
                 >
                   <span className="text-lg font-bold">{date.day}</span>
-                  <span className={isDateSelected(date.day, date.month) ? "text-white" : "text-gray-500"} dir="rtl">{date.month}</span>
+                  <span 
+                    className={isDateSelected(date.day, date.month) ? "text-white" : "text-gray-500"} 
+                    dir="rtl"
+                  >
+                    {date.month}
+                  </span>
                 </button>
               ))}
             </div>
