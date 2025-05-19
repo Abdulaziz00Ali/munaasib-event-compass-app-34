@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -67,11 +66,11 @@ const BookingForm = () => {
     
     console.log(bookingData);
     
-    // Show success toast
+    // Show success toast - changing variant from "success" to "default"
     toast({
       title: "تم تأكيد الحجز بنجاح!",
       description: "يمكنك مراجعة تفاصيل الحجز في صفحة الحجوزات",
-      variant: "success",
+      variant: "default",
     });
     
     // Navigate to bookings page
