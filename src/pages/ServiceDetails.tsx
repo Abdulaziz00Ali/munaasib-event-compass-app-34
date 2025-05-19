@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Share, Calendar, Star, MapPin, StarHalf, StarOff } from 'lucide-react';
 import { 
@@ -30,9 +31,16 @@ import { ar } from 'date-fns/locale';
 
 const ServiceDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [selectedPackage, setSelectedPackage] = useState<string>('gold');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
+  const [availableDates, setAvailableDates] = useState([
+    { day: 14, month: 'ذو القعدة', year: 1446 },
+    { day: 15, month: 'ذو القعدة', year: 1446 },
+    { day: 18, month: 'ذو القعدة', year: 1446 },
+    { day: 20, month: 'ذو القعدة', year: 1446 },
+  ]);
   
   // This is mock data - in a real app, you would fetch this from an API
   const service = {
@@ -90,12 +98,6 @@ const ServiceDetails = () => {
         description: 'قاعة فقط',
       },
     ],
-    availableDates: [
-      { day: 14, month: 'ذو ��لقعدة', year: 1446 },
-      { day: 15, month: 'ذو القعدة', year: 1446 },
-      { day: 18, month: 'ذو القعدة', year: 1446 },
-      { day: 20, month: 'ذو القعدة', year: 1446 },
-    ],
     reviews: [
       {
         id: '1',
@@ -123,6 +125,32 @@ const ServiceDetails = () => {
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
     setCalendarOpen(false);
+    
+    // If date is selected, check if it's already in available dates
+    if (date) {
+      const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+        day: 'numeric',
+        month: 'long',
+      }).format(date);
+      
+      const [day, month] = hijriDate.split(' ');
+      const dayNum = parseInt(day);
+      
+      // Check if day already exists in available dates
+      const dateExists = availableDates.some(d => d.day === dayNum && d.month === month);
+      
+      // If not, add it
+      if (!dateExists) {
+        setAvailableDates(prev => [
+          ...prev,
+          {
+            day: dayNum,
+            month: month,
+            year: 1446 // Default year for mock data
+          }
+        ]);
+      }
+    }
   };
 
   // Format date in Hijri
@@ -135,14 +163,18 @@ const ServiceDetails = () => {
   };
   
   // Check if a date is in the available dates list
-  const isDateSelected = (day: number) => {
+  const isDateSelected = (day: number, month: string) => {
     if (!selectedDate) return false;
     
     const dateInHijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
       day: 'numeric',
+      month: 'long',
     }).format(selectedDate);
     
-    return parseInt(dateInHijri) === day;
+    const [selectedDay, selectedMonth] = dateInHijri.split(' ');
+    const selectedDayNum = parseInt(selectedDay);
+    
+    return selectedDayNum === day && selectedMonth === month;
   };
 
   const renderRatingStars = (rating: number) => {
@@ -161,6 +193,11 @@ const ServiceDetails = () => {
     }
     
     return stars;
+  };
+  
+  const handleBookNow = () => {
+    // Navigate to booking form with selected package
+    navigate(`/booking/${id}`, { state: { selectedPackage } });
   };
 
   return (
@@ -302,7 +339,7 @@ const ServiceDetails = () => {
           <div className="relative">
             <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
               <div className="flex justify-between mb-2">
-                <span className="font-medium">شهر {service.availableDates[0].month}</span>
+                <span className="font-medium">شهر {availableDates[0]?.month || "ذو القعدة"}</span>
                 <PopoverTrigger asChild>
                   <button 
                     className="text-munaasib-red flex items-center text-sm"
@@ -324,15 +361,16 @@ const ServiceDetails = () => {
             </Popover>
             
             <div className="flex gap-3 overflow-x-auto pb-2">
-              {service.availableDates.map((date, index) => (
+              {availableDates.map((date, index) => (
                 <button 
                   key={index} 
-                  className={`bg-white border rounded-lg p-4 flex flex-col items-center min-w-[80px] hover:border-munaasib-red focus:outline-none ${
-                    isDateSelected(date.day) ? 'border-munaasib-red bg-munaasib-lightRed' : 'border-gray-200'
+                  className={`bg-white border rounded-lg p-4 flex flex-col items-center min-w-[80px] hover:border-green-500 focus:outline-none ${
+                    isDateSelected(date.day, date.month) 
+                      ? 'border-green-500 bg-green-50' 
+                      : 'border-gray-200'
                   }`}
                   onClick={() => {
-                    // For demo purposes, we'll create a date that will convert to the correct Hijri date
-                    // In a real app, you'd use a proper Hijri date library to create an accurate date
+                    // Create a date that matches this Hijri date
                     const today = new Date();
                     setSelectedDate(today);
                   }}
@@ -377,12 +415,12 @@ const ServiceDetails = () => {
         </div>
         
         <div className="sticky bottom-20 left-0 right-0 bg-white pt-4 pb-4 mt-8">
-          <Link
-            to={`/booking/${id}`}
+          <button
+            onClick={handleBookNow}
             className="block w-full bg-green-600 text-white text-center py-3 rounded-lg font-bold hover:bg-green-700 transition-colors"
           >
             احجز الآن
-          </Link>
+          </button>
         </div>
       </div>
     </Layout>

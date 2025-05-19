@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
@@ -12,12 +13,16 @@ import { useToast } from '@/hooks/use-toast';
 const BookingForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState('');
   const [timeOpen, setTimeOpen] = useState(false);
   const [dateOpen, setDateOpen] = useState(false);
   const [notes, setNotes] = useState('');
+  
+  // Get selected package from location state if available
+  const selectedPackageId = location.state?.selectedPackage || null;
   
   // Mock service data - in a real app, you would fetch based on the id
   const service = {
@@ -28,7 +33,37 @@ const BookingForm = () => {
     rating: 4.8,
     basePrice: 1500,
     tax: 15, // 15%
+    packages: [
+      {
+        id: 'gold',
+        name: 'الباقة الذهبية',
+        price: 15000,
+      },
+      {
+        id: 'silver',
+        name: 'الباقة الفضية',
+        price: 10000,
+      },
+      {
+        id: 'bronze',
+        name: 'الباقة البرونزية',
+        price: 7000,
+      },
+    ],
   };
+  
+  // Get price from selected package or use base price
+  const getBasePrice = () => {
+    if (selectedPackageId) {
+      const selectedPackage = service.packages.find(pkg => pkg.id === selectedPackageId);
+      return selectedPackage ? selectedPackage.price : service.basePrice;
+    }
+    return service.basePrice;
+  };
+  
+  const basePrice = getBasePrice();
+  const taxAmount = basePrice * (service.tax / 100);
+  const totalAmount = basePrice + taxAmount;
   
   // Time slots available for selection
   const timeSlots = [
@@ -62,6 +97,9 @@ const BookingForm = () => {
       status: 'pending',
       title: 'حجز جديد',
       venue: service.name,
+      basePrice: basePrice,
+      taxAmount: taxAmount,
+      totalAmount: totalAmount,
     };
     
     console.log(bookingData);
@@ -96,9 +134,6 @@ const BookingForm = () => {
     setTime(selectedTime);
     setTimeOpen(false);
   };
-  
-  const taxAmount = service.basePrice * (service.tax / 100);
-  const totalAmount = service.basePrice + taxAmount;
 
   return (
     <Layout title="طلب الحجز" showBack>
@@ -205,7 +240,7 @@ const BookingForm = () => {
           <h3 className="font-bold mb-2">تفاصيل السعر</h3>
           <div className="flex justify-between mb-2">
             <span>السعر الأساسي</span>
-            <span>{service.basePrice} ريال</span>
+            <span>{basePrice} ريال</span>
           </div>
           <div className="flex justify-between mb-2">
             <span>ضريبة القيمة المضافة ({service.tax}%)</span>
