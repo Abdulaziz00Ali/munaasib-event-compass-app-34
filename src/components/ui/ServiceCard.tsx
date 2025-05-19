@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Star, MapPin } from 'lucide-react';
 
 type ServiceCardProps = {
@@ -26,16 +26,24 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   subtitle,
   onClick
 }) => {
-  const handleClick = (e: React.MouseEvent) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = (e: React.MouseEvent) => {
     if (onClick) {
-      e.preventDefault(); // Prevent link navigation if onClick is provided
+      e.preventDefault();
       onClick();
     }
   };
 
+  const handleBookNowClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/booking/${id}`);
+  };
+
   return (
     <div className="service-card">
-      <Link to={`/service/${id}`} onClick={handleClick}>
+      <Link to={`/service/${id}`} onClick={handleCardClick}>
         <div className="aspect-w-16 aspect-h-9 mb-3">
           <img
             src={image}
@@ -63,7 +71,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
           <div className="font-bold text-munaasib-red">
             {price.toLocaleString()} {priceUnit}
           </div>
-          <button className="bg-munaasib-red hover:bg-munaasib-darkRed text-white rounded-lg px-4 py-1 text-sm transition-colors">
+          <button 
+            className="bg-munaasib-red hover:bg-munaasib-darkRed text-white rounded-lg px-4 py-1 text-sm transition-colors"
+            onClick={handleBookNowClick}
+          >
             احجز الآن
           </button>
         </div>

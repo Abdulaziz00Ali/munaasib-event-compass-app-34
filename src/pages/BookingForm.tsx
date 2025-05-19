@@ -182,6 +182,7 @@ const BookingForm = () => {
                   selected={selectedDate}
                   onSelect={handleDateSelect}
                   locale={ar}
+                  className="p-3 pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>

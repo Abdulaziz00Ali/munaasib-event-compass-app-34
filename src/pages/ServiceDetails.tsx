@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -120,34 +121,51 @@ const ServiceDetails = () => {
     ]
   };
 
+  // Parse a Hijri date string into its components
+  const parseHijriDate = (hijriDateStr: string) => {
+    const parts = hijriDateStr.split(' ');
+    if (parts.length >= 2) {
+      return {
+        day: parseInt(parts[0], 10),
+        month: parts[1],
+        year: 1446 // Default value for the year
+      };
+    }
+    return null;
+  };
+
   // Handle date selection from calendar
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
     setCalendarOpen(false);
     
-    // If date is selected, add it to available dates if not already there
     if (date) {
+      // Format the Gregorian date to Hijri
       const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
         day: 'numeric',
         month: 'long',
       }).format(date);
       
-      const [day, month] = hijriDate.split(' ');
-      const dayNum = parseInt(day);
+      // Parse the Hijri date components
+      const parsedDate = parseHijriDate(hijriDate);
       
-      // Check if day already exists in available dates
-      const dateExists = availableDates.some(d => d.day === dayNum && d.month === month);
-      
-      // If not, add it
-      if (!dateExists) {
-        setAvailableDates(prev => [
-          ...prev,
-          {
-            day: dayNum,
-            month: month,
-            year: 1446 // Default year for mock data
-          }
-        ]);
+      if (parsedDate) {
+        // Check if the date already exists in available dates
+        const dateExists = availableDates.some(d => 
+          d.day === parsedDate.day && d.month === parsedDate.month
+        );
+        
+        // If not, add it to available dates
+        if (!dateExists) {
+          setAvailableDates(prev => [
+            ...prev,
+            {
+              day: parsedDate.day,
+              month: parsedDate.month,
+              year: 1446
+            }
+          ]);
+        }
       }
     }
   };
@@ -161,7 +179,7 @@ const ServiceDetails = () => {
     }).format(date);
   };
   
-  // Check if a date is in the available dates list
+  // Check if a date is the currently selected date
   const isDateSelected = (day: number, month: string) => {
     if (!selectedDate) return false;
     
@@ -170,10 +188,24 @@ const ServiceDetails = () => {
       month: 'long',
     }).format(selectedDate);
     
-    const [selectedDay, selectedMonth] = dateInHijri.split(' ');
-    const selectedDayNum = parseInt(selectedDay);
+    // Parse the Hijri date
+    const parsedSelectedDate = parseHijriDate(dateInHijri);
     
-    return selectedDayNum === day && selectedMonth === month;
+    return parsedSelectedDate && 
+           parsedSelectedDate.day === day && 
+           parsedSelectedDate.month === month;
+  };
+
+  // Sets a specific date as selected by its Hijri day and month
+  const selectDateByHijri = (day: number, month: string) => {
+    // Use today's date as a base
+    const today = new Date();
+    setSelectedDate(today);
+    
+    // Force update the component to apply the selection visually
+    setTimeout(() => {
+      setSelectedDate(new Date(today));
+    }, 10);
   };
 
   const renderRatingStars = (rating: number) => {
@@ -363,33 +395,12 @@ const ServiceDetails = () => {
               {availableDates.map((date, index) => (
                 <button 
                   key={`${date.day}-${date.month}-${index}`}
-                  className={`border rounded-lg p-4 flex flex-col items-center min-w-[80px] hover:border-green-500 focus:outline-none ${
+                  className={`border rounded-lg p-4 flex flex-col items-center min-w-[80px] hover:bg-green-100 focus:outline-none ${
                     isDateSelected(date.day, date.month) 
                       ? 'border-green-500 bg-green-500 text-white' 
                       : 'bg-white border-gray-200'
                   }`}
-                  onClick={() => {
-                    // First create a valid date object we can work with
-                    const today = new Date();
-                    
-                    // Set this date object as the selected date
-                    setSelectedDate(today);
-                    
-                    // We need to override the Hijri date check temporarily
-                    // to make this date appear selected
-                    const originalFormatMethod = Intl.DateTimeFormat.prototype.format;
-                    
-                    // Replace the format method temporarily to return our date
-                    Intl.DateTimeFormat.prototype.format = function() {
-                      return `${date.day} ${date.month}`;
-                    };
-                    
-                    // Check if it's selected and update to force re-render
-                    setTimeout(() => {
-                      // Reset the format method back to original
-                      Intl.DateTimeFormat.prototype.format = originalFormatMethod;
-                    }, 100);
-                  }}
+                  onClick={() => selectDateByHijri(date.day, date.month)}
                 >
                   <span className="text-lg font-bold">{date.day}</span>
                   <span 
