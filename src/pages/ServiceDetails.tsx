@@ -122,6 +122,24 @@ const ServiceDetails = () => {
     ]
   };
 
+  // Load any saved date information on component mount
+  useEffect(() => {
+    const savedDateStr = localStorage.getItem('selectedBookingDate');
+    const savedHijriDay = localStorage.getItem('selectedHijriDay');
+    const savedHijriMonth = localStorage.getItem('selectedHijriMonth');
+    
+    if (savedDateStr && savedHijriDay && savedHijriMonth) {
+      try {
+        const savedDate = new Date(savedDateStr);
+        setSelectedDate(savedDate);
+        setSelectedHijriDay(parseInt(savedHijriDay, 10));
+        setSelectedHijriMonth(savedHijriMonth);
+      } catch (error) {
+        console.error('Error loading saved date:', error);
+      }
+    }
+  }, []);
+
   // Parse a Hijri date string into its components - Fixed NaN issue
   const parseHijriDate = (hijriDateStr: string) => {
     if (!hijriDateStr) return null;
@@ -149,45 +167,61 @@ const ServiceDetails = () => {
 
   // Handle date selection from calendar
   const handleDateSelect = (date: Date | undefined) => {
-    setSelectedDate(date);
-    setCalendarOpen(false);
+    if (!date) {
+      setSelectedDate(undefined);
+      setSelectedHijriDay(null);
+      setSelectedHijriMonth(null);
+      
+      // Clear localStorage
+      localStorage.removeItem('selectedBookingDate');
+      localStorage.removeItem('selectedHijriDay');
+      localStorage.removeItem('selectedHijriMonth');
+      
+      setCalendarOpen(false);
+      return;
+    }
     
-    if (date) {
-      // Format the Gregorian date to Hijri
-      const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
-        day: 'numeric',
-        month: 'long',
-      }).format(date);
+    // Format the Gregorian date to Hijri
+    const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+      day: 'numeric',
+      month: 'long',
+    }).format(date);
+    
+    // Parse the Hijri date components
+    const parsedDate = parseHijriDate(hijriDate);
+    
+    if (parsedDate) {
+      // Set the selected Hijri day and month
+      setSelectedHijriDay(parsedDate.day);
+      setSelectedHijriMonth(parsedDate.month);
       
-      // Parse the Hijri date components
-      const parsedDate = parseHijriDate(hijriDate);
+      // Set the selected date
+      setSelectedDate(date);
       
-      if (parsedDate) {
-        // Set the selected Hijri day and month
-        setSelectedHijriDay(parsedDate.day);
-        setSelectedHijriMonth(parsedDate.month);
-        
-        // Store the selected date in localStorage
-        localStorage.setItem('selectedBookingDate', date.toISOString());
-        
-        // Check if the date already exists in available dates
-        const dateExists = availableDates.some(d => 
-          d.day === parsedDate.day && d.month === parsedDate.month
-        );
-        
-        // If not, add it to available dates
-        if (!dateExists) {
-          setAvailableDates(prev => [
-            ...prev,
-            {
-              day: parsedDate.day,
-              month: parsedDate.month,
-              year: 1446
-            }
-          ]);
-        }
+      // Store the selected date in localStorage
+      localStorage.setItem('selectedBookingDate', date.toISOString());
+      localStorage.setItem('selectedHijriDay', parsedDate.day.toString());
+      localStorage.setItem('selectedHijriMonth', parsedDate.month);
+      
+      // Check if the date already exists in available dates
+      const dateExists = availableDates.some(d => 
+        d.day === parsedDate.day && d.month === parsedDate.month
+      );
+      
+      // If not, add it to available dates
+      if (!dateExists) {
+        setAvailableDates(prev => [
+          ...prev,
+          {
+            day: parsedDate.day,
+            month: parsedDate.month,
+            year: 1446
+          }
+        ]);
       }
     }
+    
+    setCalendarOpen(false);
   };
 
   // Format date in Hijri
