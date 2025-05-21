@@ -122,8 +122,9 @@ const ServiceDetails = () => {
     ]
   };
 
-  // Load any saved date information on component mount
+  // Load any saved date information on component mount but don't auto-select
   useEffect(() => {
+    // Only load the saved date for display purposes, not auto-selection
     const savedDateStr = localStorage.getItem('selectedBookingDate');
     const savedHijriDay = localStorage.getItem('selectedHijriDay');
     const savedHijriMonth = localStorage.getItem('selectedHijriMonth');
@@ -131,9 +132,8 @@ const ServiceDetails = () => {
     if (savedDateStr && savedHijriDay && savedHijriMonth) {
       try {
         const savedDate = new Date(savedDateStr);
-        setSelectedDate(savedDate);
-        setSelectedHijriDay(parseInt(savedHijriDay, 10));
-        setSelectedHijriMonth(savedHijriMonth);
+        // Don't auto-set the selected date here
+        // This way we don't force selection on initial load
       } catch (error) {
         console.error('Error loading saved date:', error);
       }
@@ -239,8 +239,23 @@ const ServiceDetails = () => {
   };
 
   // Sets a specific date as selected by its Hijri day and month
+  // Modified to not lock user into a selection
   const selectDateByHijri = (day: number, month: string) => {
-    // Update the selected Hijri day and month
+    // Check if the date is already selected, if so, allow deselection
+    if (isDateSelected(day, month)) {
+      // Deselect the date
+      setSelectedHijriDay(null);
+      setSelectedHijriMonth(null);
+      setSelectedDate(undefined);
+      
+      // Clear localStorage
+      localStorage.removeItem('selectedBookingDate');
+      localStorage.removeItem('selectedHijriDay');
+      localStorage.removeItem('selectedHijriMonth');
+      return;
+    }
+    
+    // Otherwise select the date
     setSelectedHijriDay(day);
     setSelectedHijriMonth(month);
     
