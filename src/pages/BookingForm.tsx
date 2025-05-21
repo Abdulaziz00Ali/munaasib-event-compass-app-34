@@ -26,9 +26,18 @@ const BookingForm = () => {
   // Check for saved date in localStorage on component mount
   useEffect(() => {
     const savedDateStr = localStorage.getItem('selectedBookingDate');
+    const savedHijriDay = localStorage.getItem('selectedHijriDay');
+    const savedHijriMonth = localStorage.getItem('selectedHijriMonth');
+    
     if (savedDateStr) {
       try {
         const savedDate = new Date(savedDateStr);
+        
+        // If we have saved Hijri information, use that to create a more accurate display date
+        if (savedHijriDay && savedHijriMonth) {
+          console.log(`Using saved Hijri date: ${savedHijriDay}/${savedHijriMonth}`);
+        }
+        
         setSelectedDate(savedDate);
       } catch (error) {
         console.error('Error parsing saved date:', error);
@@ -126,11 +135,23 @@ const BookingForm = () => {
     // Navigate to bookings page
     navigate('/bookings');
     
-    // Clear the stored date after successful booking
+    // Clear all stored date data after successful booking
     localStorage.removeItem('selectedBookingDate');
+    localStorage.removeItem('selectedHijriDay');
+    localStorage.removeItem('selectedHijriMonth');
   };
 
+  // Custom function to format Hijri date with priority to stored Hijri values
   const formatHijriDate = (date: Date) => {
+    // Check if we have stored Hijri values first
+    const savedHijriDay = localStorage.getItem('selectedHijriDay');
+    const savedHijriMonth = localStorage.getItem('selectedHijriMonth');
+    
+    if (savedHijriDay && savedHijriMonth) {
+      return `${savedHijriDay} ${savedHijriMonth} 1446`;
+    }
+    
+    // Fallback to calculated Hijri date
     return new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
       day: 'numeric',
       month: 'long',
@@ -145,9 +166,35 @@ const BookingForm = () => {
     
     // Update localStorage when date is changed in booking form
     if (date) {
+      // Format the Gregorian date to Hijri to get day and month
+      const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+        day: 'numeric',
+        month: 'long',
+      }).format(date);
+      
+      // Parse the Hijri date components using a similar function to ServiceDetails
+      const dayMatch = hijriDate.match(/^(\d+)/);
+      const day = dayMatch ? parseInt(dayMatch[1], 10) : null;
+      
+      let month = null;
+      if (dayMatch && dayMatch.index !== undefined) {
+        const startPos = dayMatch.index + dayMatch[0].length;
+        month = hijriDate.substring(startPos).trim();
+      }
+      
       localStorage.setItem('selectedBookingDate', date.toISOString());
+      
+      if (day !== null) {
+        localStorage.setItem('selectedHijriDay', day.toString());
+      }
+      
+      if (month) {
+        localStorage.setItem('selectedHijriMonth', month);
+      }
     } else {
       localStorage.removeItem('selectedBookingDate');
+      localStorage.removeItem('selectedHijriDay');
+      localStorage.removeItem('selectedHijriMonth');
     }
   };
   

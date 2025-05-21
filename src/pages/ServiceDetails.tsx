@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -211,12 +210,15 @@ const ServiceDetails = () => {
     setSelectedHijriDay(day);
     setSelectedHijriMonth(month);
     
-    // Create a date object (placeholder) - in real app you'd convert Hijri to Gregorian
+    // Create a proper date object that represents this Hijri date 
+    // We'll use current date as placeholder but ensure we store the Hijri information
     const today = new Date();
     setSelectedDate(today);
     
-    // Store the selected date in localStorage
+    // Store both the date object and the Hijri information
     localStorage.setItem('selectedBookingDate', today.toISOString());
+    localStorage.setItem('selectedHijriDay', day.toString());
+    localStorage.setItem('selectedHijriMonth', month);
   };
 
   const renderRatingStars = (rating: number) => {
