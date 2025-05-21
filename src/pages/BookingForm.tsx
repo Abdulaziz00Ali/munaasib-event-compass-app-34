@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -23,6 +22,19 @@ const BookingForm = () => {
   
   // Get selected package from location state if available
   const selectedPackageId = location.state?.selectedPackage || null;
+  
+  // Check for saved date in localStorage on component mount
+  useEffect(() => {
+    const savedDateStr = localStorage.getItem('selectedBookingDate');
+    if (savedDateStr) {
+      try {
+        const savedDate = new Date(savedDateStr);
+        setSelectedDate(savedDate);
+      } catch (error) {
+        console.error('Error parsing saved date:', error);
+      }
+    }
+  }, []);
   
   // Mock service data - in a real app, you would fetch based on the id
   const service = {
@@ -113,6 +125,9 @@ const BookingForm = () => {
     
     // Navigate to bookings page
     navigate('/bookings');
+    
+    // Clear the stored date after successful booking
+    localStorage.removeItem('selectedBookingDate');
   };
 
   const formatHijriDate = (date: Date) => {
@@ -127,6 +142,13 @@ const BookingForm = () => {
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
     setDateOpen(false);
+    
+    // Update localStorage when date is changed in booking form
+    if (date) {
+      localStorage.setItem('selectedBookingDate', date.toISOString());
+    } else {
+      localStorage.removeItem('selectedBookingDate');
+    }
   };
   
   // Handle time selection and close the popover
