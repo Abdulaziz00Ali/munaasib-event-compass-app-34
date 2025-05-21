@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -34,6 +33,8 @@ const ServiceDetails = () => {
   const navigate = useNavigate();
   const [selectedPackage, setSelectedPackage] = useState<string>('gold');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedHijriDay, setSelectedHijriDay] = useState<number | null>(null);
+  const [selectedHijriMonth, setSelectedHijriMonth] = useState<string | null>(null);
   const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
   const [availableDates, setAvailableDates] = useState([
     { day: 14, month: 'ذو القعدة', year: 1446 },
@@ -121,13 +122,25 @@ const ServiceDetails = () => {
     ]
   };
 
-  // Parse a Hijri date string into its components
+  // Parse a Hijri date string into its components - Fixed NaN issue
   const parseHijriDate = (hijriDateStr: string) => {
-    const parts = hijriDateStr.split(' ');
-    if (parts.length >= 2) {
+    if (!hijriDateStr) return null;
+    
+    // Extract the numeric day value using regex
+    const dayMatch = hijriDateStr.match(/^(\d+)/);
+    const day = dayMatch ? parseInt(dayMatch[1], 10) : null;
+    
+    // Extract the month name (everything after the day number)
+    let month = null;
+    if (dayMatch && dayMatch.index !== undefined) {
+      const startPos = dayMatch.index + dayMatch[0].length;
+      month = hijriDateStr.substring(startPos).trim();
+    }
+    
+    if (day !== null && month) {
       return {
-        day: parseInt(parts[0], 10),
-        month: parts[1],
+        day,
+        month,
         year: 1446 // Default value for the year
       };
     }
@@ -150,6 +163,10 @@ const ServiceDetails = () => {
       const parsedDate = parseHijriDate(hijriDate);
       
       if (parsedDate) {
+        // Set the selected Hijri day and month
+        setSelectedHijriDay(parsedDate.day);
+        setSelectedHijriMonth(parsedDate.month);
+        
         // Check if the date already exists in available dates
         const dateExists = availableDates.some(d => 
           d.day === parsedDate.day && d.month === parsedDate.month
@@ -181,31 +198,18 @@ const ServiceDetails = () => {
   
   // Check if a date is the currently selected date
   const isDateSelected = (day: number, month: string) => {
-    if (!selectedDate) return false;
-    
-    const dateInHijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
-      day: 'numeric',
-      month: 'long',
-    }).format(selectedDate);
-    
-    // Parse the Hijri date
-    const parsedSelectedDate = parseHijriDate(dateInHijri);
-    
-    return parsedSelectedDate && 
-           parsedSelectedDate.day === day && 
-           parsedSelectedDate.month === month;
+    return selectedHijriDay === day && selectedHijriMonth === month;
   };
 
   // Sets a specific date as selected by its Hijri day and month
   const selectDateByHijri = (day: number, month: string) => {
-    // Use today's date as a base
+    // Update the selected Hijri day and month
+    setSelectedHijriDay(day);
+    setSelectedHijriMonth(month);
+    
+    // Create a date object (placeholder) - in real app you'd convert Hijri to Gregorian
     const today = new Date();
     setSelectedDate(today);
-    
-    // Force update the component to apply the selection visually
-    setTimeout(() => {
-      setSelectedDate(new Date(today));
-    }, 10);
   };
 
   const renderRatingStars = (rating: number) => {
@@ -395,10 +399,10 @@ const ServiceDetails = () => {
               {availableDates.map((date, index) => (
                 <button 
                   key={`${date.day}-${date.month}-${index}`}
-                  className={`border rounded-lg p-4 flex flex-col items-center min-w-[80px] hover:bg-green-100 focus:outline-none ${
+                  className={`border rounded-lg p-4 flex flex-col items-center min-w-[80px] focus:outline-none transition-colors ${
                     isDateSelected(date.day, date.month) 
                       ? 'border-green-500 bg-green-500 text-white' 
-                      : 'bg-white border-gray-200'
+                      : 'bg-white border-gray-200 hover:bg-green-100'
                   }`}
                   onClick={() => selectDateByHijri(date.day, date.month)}
                 >
