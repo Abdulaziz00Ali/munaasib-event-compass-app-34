@@ -35,7 +35,7 @@ const ServiceDetails = () => {
   const { toast } = useToast();
   const [selectedPackage, setSelectedPackage] = useState<string>('gold');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedHijriDay, setSelectedHijriDay] = useState<number | null>(null);
+  const [selectedHijriDay, setSelectedHijriDay] = useState<string | null>(null);
   const [selectedHijriMonth, setSelectedHijriMonth] = useState<string | null>(null);
   const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
   const [availableDates, setAvailableDates] = useState([
@@ -134,25 +134,33 @@ const ServiceDetails = () => {
       try {
         const savedDate = new Date(savedDateStr);
         setSelectedDate(savedDate);
-        setSelectedHijriDay(parseInt(savedHijriDay));
+        setSelectedHijriDay(savedHijriDay);
         setSelectedHijriMonth(savedHijriMonth);
       } catch (error) {
         console.error('Error loading saved date:', error);
         // Clear invalid data
-        localStorage.removeItem('selectedBookingDate');
-        localStorage.removeItem('selectedHijriDay');
-        localStorage.removeItem('selectedHijriMonth');
+        clearStoredDateData();
       }
     }
   }, []);
 
+  // Function to clear stored date data
+  const clearStoredDateData = () => {
+    localStorage.removeItem('selectedBookingDate');
+    localStorage.removeItem('selectedHijriDay');
+    localStorage.removeItem('selectedHijriMonth');
+    setSelectedDate(undefined);
+    setSelectedHijriDay(null);
+    setSelectedHijriMonth(null);
+  };
+
   // Parse a Hijri date string into its components
   const parseHijriDate = (hijriDateStr: string) => {
-    if (!hijriDateStr) return null;
+    if (!hijriDateStr) return { day: null, month: null };
     
     // Extract the numeric day value using regex
     const dayMatch = hijriDateStr.match(/^(\d+)/);
-    const day = dayMatch ? parseInt(dayMatch[1], 10) : null;
+    const day = dayMatch ? dayMatch[0] : null;
     
     // Extract the month name (everything after the day number)
     let month = null;
@@ -161,27 +169,13 @@ const ServiceDetails = () => {
       month = hijriDateStr.substring(startPos).trim();
     }
     
-    if (day !== null && month) {
-      return {
-        day,
-        month,
-        year: 1446 // Default value for the year
-      };
-    }
-    return null;
+    return { day, month };
   };
 
   // Handle date selection from calendar
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) {
-      setSelectedDate(undefined);
-      setSelectedHijriDay(null);
-      setSelectedHijriMonth(null);
-      
-      // Clear localStorage
-      localStorage.removeItem('selectedBookingDate');
-      localStorage.removeItem('selectedHijriDay');
-      localStorage.removeItem('selectedHijriMonth');
+      clearStoredDateData();
       
       toast({
         title: "تم إلغاء اختيار التاريخ",
@@ -199,24 +193,30 @@ const ServiceDetails = () => {
     }).format(date);
     
     // Parse the Hijri date components
-    const parsedDate = parseHijriDate(hijriDate);
+    const { day, month } = parseHijriDate(hijriDate);
     
-    if (parsedDate) {
+    if (day && month) {
       // Set the selected Hijri day and month
-      setSelectedHijriDay(parsedDate.day);
-      setSelectedHijriMonth(parsedDate.month);
+      setSelectedHijriDay(day);
+      setSelectedHijriMonth(month);
       
       // Set the selected date
       setSelectedDate(date);
       
       // Store the selected date in localStorage
       localStorage.setItem('selectedBookingDate', date.toISOString());
-      localStorage.setItem('selectedHijriDay', parsedDate.day.toString());
-      localStorage.setItem('selectedHijriMonth', parsedDate.month);
+      localStorage.setItem('selectedHijriDay', day);
+      localStorage.setItem('selectedHijriMonth', month);
       
       toast({
         title: "تم اختيار التاريخ",
-        description: `تم اختيار ${parsedDate.day} ${parsedDate.month} كتاريخ للحجز`,
+        description: `تم اختيار ${day} ${month} كتاريخ للحجز`,
+      });
+    } else {
+      toast({
+        title: "خطأ في تنسيق التاريخ",
+        description: "تعذر تحليل التاريخ الهجري بشكل صحيح",
+        variant: "destructive",
       });
     }
     
@@ -234,12 +234,44 @@ const ServiceDetails = () => {
   
   // Check if a date is the currently selected date
   const isDateSelected = (day: number, month: string) => {
-    return selectedHijriDay === day && selectedHijriMonth === month;
+    const dayStr = day.toString();
+    return selectedHijriDay === dayStr && selectedHijriMonth === month;
   };
 
-  // Handle click on an available date - now just opens calendar
-  const handleDateClick = () => {
-    setCalendarOpen(true);
+  // Handle click on an available date
+  const handleDateClick = (day: number, month: string) => {
+    // Convert to strings for consistency
+    const dayStr = day.toString();
+    
+    // If this date is already selected, deselect it
+    if (isDateSelected(day, month)) {
+      clearStoredDateData();
+      
+      toast({
+        title: "تم إلغاء اختيار التاريخ",
+        description: "تم إلغاء تاريخ الحجز بنجاح",
+      });
+      return;
+    }
+    
+    // Otherwise select it
+    setSelectedHijriDay(dayStr);
+    setSelectedHijriMonth(month);
+    
+    // Store in localStorage
+    localStorage.setItem('selectedHijriDay', dayStr);
+    localStorage.setItem('selectedHijriMonth', month);
+    
+    // Since we don't have an exact Gregorian date for the Hijri date,
+    // we'll use the current date as a placeholder
+    const today = new Date();
+    localStorage.setItem('selectedBookingDate', today.toISOString());
+    setSelectedDate(today);
+    
+    toast({
+      title: "تم اختيار التاريخ",
+      description: `تم اختيار ${dayStr} ${month} كتاريخ للحجز`,
+    });
   };
 
   const renderRatingStars = (rating: number) => {
@@ -435,7 +467,7 @@ const ServiceDetails = () => {
               {availableDates.map((date, index) => (
                 <button 
                   key={`${date.day}-${date.month}-${index}`}
-                  onClick={handleDateClick}
+                  onClick={() => handleDateClick(date.day, date.month)}
                   className={`border rounded-lg p-4 flex flex-col items-center min-w-[80px] focus:outline-none transition-colors ${
                     isDateSelected(date.day, date.month) 
                       ? 'border-green-500 bg-green-50 text-green-700'  

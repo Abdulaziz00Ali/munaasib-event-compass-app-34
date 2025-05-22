@@ -101,7 +101,7 @@ const VendorDashboard = () => {
     
     // Extract the numeric day value using regex
     const dayMatch = hijriDateStr.match(/^(\d+)/);
-    const day = dayMatch ? parseInt(dayMatch[1], 10) : null;
+    const day = dayMatch ? parseInt(dayMatch[0], 10) : null;
     
     // Extract the month name (everything after the day number)
     let month = null;
@@ -143,15 +143,18 @@ const VendorDashboard = () => {
       );
       
       if (!dateExists) {
-        // Add new available date
-        setAvailableDates(prev => [
-          ...prev,
+        // Create new array with added date
+        const newDates = [
+          ...availableDates,
           {
             day: parsedDate.day,
             month: parsedDate.month,
             year: parsedDate.year
           }
-        ]);
+        ];
+        
+        // Update state
+        setAvailableDates(newDates);
         
         toast({
           title: "تمت إضافة التاريخ بنجاح",
@@ -173,7 +176,6 @@ const VendorDashboard = () => {
   // Bulk add dates to available dates
   const handleAddMultipleDates = () => {
     // This would open a more complex UI component for date range selection
-    // For now, just show a toast notification about the feature
     toast({
       title: "إضافة مواعيد متعددة",
       description: "هذه الميزة ستكون متاحة قريباً",
@@ -200,9 +202,11 @@ const VendorDashboard = () => {
   
   // Remove a date from available dates
   const removeDate = (day: number, month: string) => {
-    setAvailableDates(prev => 
-      prev.filter(d => !(d.day === day && d.month === month))
+    const updatedDates = availableDates.filter(
+      d => !(d.day === day && d.month === month)
     );
+    
+    setAvailableDates(updatedDates);
     
     toast({
       title: "تم حذف التاريخ",

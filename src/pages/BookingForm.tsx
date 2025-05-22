@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -19,6 +20,8 @@ const BookingForm = () => {
   const [timeOpen, setTimeOpen] = useState(false);
   const [dateOpen, setDateOpen] = useState(false);
   const [notes, setNotes] = useState('');
+  const [hijriDay, setHijriDay] = useState<string | null>(null);
+  const [hijriMonth, setHijriMonth] = useState<string | null>(null);
   
   // Get selected package from location state if available
   const selectedPackageId = location.state?.selectedPackage || null;
@@ -35,17 +38,27 @@ const BookingForm = () => {
         
         // Set the date from localStorage if it exists
         setSelectedDate(savedDate);
+        setHijriDay(savedHijriDay);
+        setHijriMonth(savedHijriMonth);
         
         console.log(`Loading saved date from localStorage: ${savedHijriDay}/${savedHijriMonth}`);
       } catch (error) {
         console.error('Error parsing saved date:', error);
         // Clear invalid date data
-        localStorage.removeItem('selectedBookingDate');
-        localStorage.removeItem('selectedHijriDay');
-        localStorage.removeItem('selectedHijriMonth');
+        clearStoredDateData();
       }
     }
   }, []);
+  
+  // Function to clear all stored date data
+  const clearStoredDateData = () => {
+    localStorage.removeItem('selectedBookingDate');
+    localStorage.removeItem('selectedHijriDay');
+    localStorage.removeItem('selectedHijriMonth');
+    setSelectedDate(undefined);
+    setHijriDay(null);
+    setHijriMonth(null);
+  };
   
   // Mock service data - in a real app, you would fetch based on the id
   const service = {
@@ -138,19 +151,14 @@ const BookingForm = () => {
     navigate('/bookings');
     
     // Clear all stored date data after successful booking
-    localStorage.removeItem('selectedBookingDate');
-    localStorage.removeItem('selectedHijriDay');
-    localStorage.removeItem('selectedHijriMonth');
+    clearStoredDateData();
   };
 
   // Custom function to format Hijri date with priority to stored Hijri values
   const formatHijriDate = (date: Date) => {
     // Check if we have stored Hijri values first
-    const savedHijriDay = localStorage.getItem('selectedHijriDay');
-    const savedHijriMonth = localStorage.getItem('selectedHijriMonth');
-    
-    if (savedHijriDay && savedHijriMonth) {
-      return `${savedHijriDay} ${savedHijriMonth} 1446`;
+    if (hijriDay && hijriMonth) {
+      return `${hijriDay} ${hijriMonth} 1446`;
     }
     
     // Fallback to calculated Hijri date
@@ -175,7 +183,7 @@ const BookingForm = () => {
       
       // Parse the Hijri date components
       const dayMatch = hijriDate.match(/^(\d+)/);
-      const day = dayMatch ? parseInt(dayMatch[1], 10) : null;
+      const day = dayMatch ? dayMatch[0] : null;
       
       let month = null;
       if (dayMatch && dayMatch.index !== undefined) {
@@ -183,25 +191,31 @@ const BookingForm = () => {
         month = hijriDate.substring(startPos).trim();
       }
       
+      // Set the state values
+      setHijriDay(day);
+      setHijriMonth(month);
+      
+      // Store the values in localStorage
       localStorage.setItem('selectedBookingDate', date.toISOString());
       
       if (day !== null) {
-        localStorage.setItem('selectedHijriDay', day.toString());
+        localStorage.setItem('selectedHijriDay', day);
       }
       
       if (month) {
         localStorage.setItem('selectedHijriMonth', month);
       }
       
-      toast({
-        title: "تم اختيار التاريخ",
-        description: `تم اختيار ${day} ${month} كتاريخ للحجز`,
-      });
+      // Only show toast if both day and month are available
+      if (day && month) {
+        toast({
+          title: "تم اختيار التاريخ",
+          description: `تم اختيار ${day} ${month} كتاريخ للحجز`,
+        });
+      }
     } else {
       // Clear localStorage if date is cleared
-      localStorage.removeItem('selectedBookingDate');
-      localStorage.removeItem('selectedHijriDay');
-      localStorage.removeItem('selectedHijriMonth');
+      clearStoredDateData();
       
       toast({
         title: "تم إلغاء اختيار التاريخ",
@@ -258,7 +272,9 @@ const BookingForm = () => {
                     <CalendarIcon className="w-5 h-5" />
                   </div>
                   <span className="mr-8">
-                    {selectedDate ? formatHijriDate(selectedDate) : "اختر التاريخ"}
+                    {selectedDate && hijriDay && hijriMonth 
+                      ? `${hijriDay} ${hijriMonth} 1446` 
+                      : "اختر التاريخ"}
                   </span>
                 </Button>
               </PopoverTrigger>
