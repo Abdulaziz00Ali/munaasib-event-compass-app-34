@@ -202,23 +202,6 @@ const ServiceDetails = () => {
       localStorage.setItem('selectedBookingDate', date.toISOString());
       localStorage.setItem('selectedHijriDay', parsedDate.day.toString());
       localStorage.setItem('selectedHijriMonth', parsedDate.month);
-      
-      // Check if the date already exists in available dates
-      const dateExists = availableDates.some(d => 
-        d.day === parsedDate.day && d.month === parsedDate.month
-      );
-      
-      // If not, add it to available dates
-      if (!dateExists) {
-        setAvailableDates(prev => [
-          ...prev,
-          {
-            day: parsedDate.day,
-            month: parsedDate.month,
-            year: 1446
-          }
-        ]);
-      }
     }
     
     setCalendarOpen(false);
@@ -239,35 +222,13 @@ const ServiceDetails = () => {
   };
 
   // Sets a specific date as selected by its Hijri day and month
-  // Modified to not lock user into a selection
+  // This version is read-only - selection can only be done from calendar view
   const selectDateByHijri = (day: number, month: string) => {
-    // Check if the date is already selected, if so, allow deselection
-    if (isDateSelected(day, month)) {
-      // Deselect the date
-      setSelectedHijriDay(null);
-      setSelectedHijriMonth(null);
-      setSelectedDate(undefined);
-      
-      // Clear localStorage
-      localStorage.removeItem('selectedBookingDate');
-      localStorage.removeItem('selectedHijriDay');
-      localStorage.removeItem('selectedHijriMonth');
-      return;
-    }
+    // We no longer allow selection from the available dates directly
+    // Only displaying the available dates provided by vendor
     
-    // Otherwise select the date
-    setSelectedHijriDay(day);
-    setSelectedHijriMonth(month);
-    
-    // Create a proper date object that represents this Hijri date 
-    // We'll use current date as placeholder but ensure we store the Hijri information
-    const today = new Date();
-    setSelectedDate(today);
-    
-    // Store both the date object and the Hijri information
-    localStorage.setItem('selectedBookingDate', today.toISOString());
-    localStorage.setItem('selectedHijriDay', day.toString());
-    localStorage.setItem('selectedHijriMonth', month);
+    // Instead, we'll open the calendar when an available date is clicked
+    setCalendarOpen(true);
   };
 
   const renderRatingStars = (rating: number) => {
@@ -459,16 +420,13 @@ const ServiceDetails = () => {
                   key={`${date.day}-${date.month}-${index}`}
                   className={`border rounded-lg p-4 flex flex-col items-center min-w-[80px] focus:outline-none transition-colors ${
                     isDateSelected(date.day, date.month) 
-                      ? 'border-green-500 bg-green-500 text-white' 
-                      : 'bg-white border-gray-200 hover:bg-green-100'
-                  }`}
-                  onClick={() => selectDateByHijri(date.day, date.month)}
+                      ? 'border-green-500 bg-green-50 text-green-700'  
+                      : 'bg-white border-gray-200'
+                  } cursor-default`}
+                  onClick={() => setCalendarOpen(true)}
                 >
                   <span className="text-lg font-bold">{date.day}</span>
-                  <span 
-                    className={isDateSelected(date.day, date.month) ? "text-white" : "text-gray-500"} 
-                    dir="rtl"
-                  >
+                  <span className="text-gray-500" dir="rtl">
                     {date.month}
                   </span>
                 </button>

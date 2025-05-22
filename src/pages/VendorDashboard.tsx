@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Pencil, Trash2, Clock } from 'lucide-react';
+import { Pencil, Trash2, Clock, Calendar as CalendarIcon, Plus, X } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { ar } from 'date-fns/locale';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useToast } from '@/hooks/use-toast';
 
 const VendorDashboard = () => {
   // Sample data for vendor dashboard
@@ -14,7 +18,18 @@ const VendorDashboard = () => {
     status: 'متاح حالياً',
     statusColor: 'text-green-500',
   };
-
+  
+  const [availableDates, setAvailableDates] = useState([
+    { day: 14, month: 'ذو القعدة', year: 1446 },
+    { day: 15, month: 'ذو القعدة', year: 1446 },
+    { day: 18, month: 'ذو القعدة', year: 1446 },
+    { day: 20, month: 'ذو القعدة', year: 1446 },
+  ]);
+  
+  const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const { toast } = useToast();
+  
   const services = [
     {
       id: 1,
@@ -58,7 +73,7 @@ const VendorDashboard = () => {
     {
       id: 2,
       client: 'أحمد خالد',
-      date: '٢٦ رمضان',
+      date: '٢٥ رمضان',
       time: '٨:٠٠ مساءً',
       status: 'معلق',
       statusColor: 'text-amber-500',
@@ -79,6 +94,93 @@ const VendorDashboard = () => {
       unread: false,
     },
   ];
+  
+  // Parse a Hijri date string into its components
+  const parseHijriDate = (hijriDateStr: string) => {
+    if (!hijriDateStr) return null;
+    
+    // Extract the numeric day value using regex
+    const dayMatch = hijriDateStr.match(/^(\d+)/);
+    const day = dayMatch ? parseInt(dayMatch[1], 10) : null;
+    
+    // Extract the month name (everything after the day number)
+    let month = null;
+    if (dayMatch && dayMatch.index !== undefined) {
+      const startPos = dayMatch.index + dayMatch[0].length;
+      month = hijriDateStr.substring(startPos).trim();
+    }
+    
+    if (day !== null && month) {
+      return {
+        day,
+        month,
+        year: 1446 // Default value for the year
+      };
+    }
+    return null;
+  };
+  
+  // Handle adding a new available date
+  const handleDateSelect = (date: Date | undefined) => {
+    if (!date) {
+      setSelectedDate(undefined);
+      return;
+    }
+    
+    // Format the Gregorian date to Hijri
+    const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+      day: 'numeric',
+      month: 'long',
+    }).format(date);
+    
+    // Parse the Hijri date components
+    const parsedDate = parseHijriDate(hijriDate);
+    
+    if (parsedDate) {
+      // Check if date already exists
+      const dateExists = availableDates.some(
+        d => d.day === parsedDate.day && d.month === parsedDate.month
+      );
+      
+      if (!dateExists) {
+        // Add new available date
+        setAvailableDates(prev => [
+          ...prev,
+          {
+            day: parsedDate.day,
+            month: parsedDate.month,
+            year: parsedDate.year
+          }
+        ]);
+        
+        toast({
+          title: "تمت إضافة التاريخ بنجاح",
+          description: `تم إضافة ${parsedDate.day} ${parsedDate.month} إلى المواعيد المتاحة`,
+        });
+      } else {
+        toast({
+          title: "التاريخ موجود بالفعل",
+          description: `${parsedDate.day} ${parsedDate.month} مضاف مسبقاً في المواعيد المتاحة`,
+          variant: "destructive",
+        });
+      }
+    }
+    
+    setSelectedDate(undefined);
+    setCalendarOpen(false);
+  };
+  
+  // Remove a date from available dates
+  const removeDate = (day: number, month: string) => {
+    setAvailableDates(prev => 
+      prev.filter(d => !(d.day === day && d.month === month))
+    );
+    
+    toast({
+      title: "تم حذف التاريخ",
+      description: `تم حذف ${day} ${month} من المواعيد المتاحة`,
+    });
+  };
 
   return (
     <Layout title="لوحة التحكم" showSearch={false} showNotification={false} showBottomNav={false}>
@@ -104,11 +206,56 @@ const VendorDashboard = () => {
         </div>
       </div>
 
+      {/* Available Dates Management Section */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-bold">إدارة المواعيد المتاحة</h2>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <Button className="bg-munaasib-red">
+                <Plus className="h-4 w-4 mr-2" /> إضافة موعد
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                locale={ar}
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <div className="grid grid-cols-4 gap-2">
+            {availableDates.map((date, index) => (
+              <div 
+                key={`${date.day}-${date.month}-${index}`}
+                className="border rounded-lg p-3 flex flex-col items-center relative"
+              >
+                <button 
+                  className="absolute top-1 left-1 text-gray-400 hover:text-red-500"
+                  onClick={() => removeDate(date.day, date.month)}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+                <span className="text-lg font-bold">{date.day}</span>
+                <span className="text-gray-500 text-sm" dir="rtl">
+                  {date.month}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">قائمة خدماتي</h2>
           <Button className="bg-munaasib-red">
-            <span>+</span> إضافة خدمة
+            <Plus className="h-4 w-4 mr-2" /> إضافة خدمة
           </Button>
         </div>
 

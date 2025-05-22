@@ -33,12 +33,10 @@ const BookingForm = () => {
       try {
         const savedDate = new Date(savedDateStr);
         
-        // If we have saved Hijri information, use that to create a more accurate display date
-        if (savedHijriDay && savedHijriMonth) {
-          console.log(`Using saved Hijri date: ${savedHijriDay}/${savedHijriMonth}`);
-        }
-        
+        // Always set the date from localStorage if it exists
         setSelectedDate(savedDate);
+        
+        console.log(`Loading saved date from localStorage: ${savedHijriDay}/${savedHijriMonth}`);
       } catch (error) {
         console.error('Error parsing saved date:', error);
       }
