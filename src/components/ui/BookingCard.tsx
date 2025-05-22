@@ -1,6 +1,17 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type BookingCardProps = {
   id: string;
@@ -48,9 +59,7 @@ const BookingCard: React.FC<BookingCardProps> = ({
   };
   
   const handleCancel = () => {
-    if (window.confirm('هل أنت متأكد من إلغاء هذا الحجز؟')) {
-      onCancel(id);
-    }
+    onCancel(id);
   };
 
   return (
@@ -92,12 +101,26 @@ const BookingCard: React.FC<BookingCardProps> = ({
         >
           تعديل الحجز
         </button>
-        <button 
-          onClick={handleCancel} 
-          className="border border-gray-300 text-gray-700 py-2 px-6 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-        >
-          إلغاء الحجز
-        </button>
+        
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button className="border border-gray-300 text-gray-700 py-2 px-6 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+              إلغاء الحجز
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent className="text-right">
+            <AlertDialogHeader>
+              <AlertDialogTitle>هل أنت متأكد من إلغاء هذا الحجز؟</AlertDialogTitle>
+              <AlertDialogDescription>
+                سيتم إلغاء الحجز بشكل نهائي ولن تتمكن من استعادته.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex-row-reverse space-x-reverse space-x-2">
+              <AlertDialogCancel>إلغاء</AlertDialogCancel>
+              <AlertDialogAction onClick={handleCancel} className="bg-red-500 hover:bg-red-600">نعم، إلغاء الحجز</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

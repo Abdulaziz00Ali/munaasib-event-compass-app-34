@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -9,6 +8,17 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+
+type EditBookingData = {
+  id: string;
+  title: string;
+  venue: string;
+  date: string;
+  time: string;
+  location: string;
+  image: string;
+  status: 'confirmed' | 'pending' | 'cancelled';
+};
 
 const BookingForm = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,50 +32,78 @@ const BookingForm = () => {
   const [notes, setNotes] = useState('');
   const [hijriDay, setHijriDay] = useState<string | null>(null);
   const [hijriMonth, setHijriMonth] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingBooking, setEditingBooking] = useState<EditBookingData | null>(null);
   
   // Get selected package from location state if available
   const selectedPackageId = location.state?.selectedPackage || null;
   
-  // Check for saved date in localStorage on component mount
+  // Check if we're editing an existing booking
   useEffect(() => {
-    const clearStoredDate = () => {
-      localStorage.removeItem('selectedBookingDate');
-      localStorage.removeItem('selectedHijriDay');
-      localStorage.removeItem('selectedHijriMonth');
-      setSelectedDate(undefined);
-      setHijriDay(null);
-      setHijriMonth(null);
-    };
+    // Check if we're editing by looking for stored booking data
+    const storedBooking = localStorage.getItem('currentEditBooking');
     
-    // Try to get date from localStorage
-    const savedDateStr = localStorage.getItem('selectedBookingDate');
-    const savedHijriDay = localStorage.getItem('selectedHijriDay');
-    const savedHijriMonth = localStorage.getItem('selectedHijriMonth');
-    
-    // Only proceed if we have all three values
-    if (savedDateStr && savedHijriDay && savedHijriMonth) {
+    if (storedBooking) {
       try {
-        const savedDate = new Date(savedDateStr);
-        // Check if date is valid
-        if (isNaN(savedDate.getTime())) {
-          console.error('Invalid date from localStorage');
-          clearStoredDate();
-          return;
+        const bookingData = JSON.parse(storedBooking) as EditBookingData;
+        setEditingBooking(bookingData);
+        setIsEditing(true);
+        
+        // Pre-fill form fields with booking data
+        setHijriDay(null); // Will be parsed from the date
+        setHijriMonth(null); // Will be parsed from the date
+        setTime(bookingData.time || '');
+        
+        // Show toast to indicate we're in edit mode
+        toast({
+          title: "وضع التعديل",
+          description: "أنت الآن تقوم بتعديل حجز موجود",
+        });
+        
+        // Parse the date (if possible)
+        if (bookingData.date) {
+          const dateParts = bookingData.date.split(' ');
+          if (dateParts.length >= 2) {
+            setHijriDay(dateParts[0]);
+            setHijriMonth(dateParts.slice(1).join(' '));
+          }
         }
-        
-        // Set the date from localStorage if it exists
-        setSelectedDate(savedDate);
-        setHijriDay(savedHijriDay);
-        setHijriMonth(savedHijriMonth);
-        
-        console.log(`Loading saved date from localStorage: ${savedHijriDay}/${savedHijriMonth}`);
       } catch (error) {
-        console.error('Error parsing saved date:', error);
-        // Clear invalid date data
-        clearStoredDate();
+        console.error('Error parsing stored booking:', error);
+        // Clear invalid data
+        localStorage.removeItem('currentEditBooking');
+      }
+    } else {
+      // Check for saved date in localStorage for new bookings
+      const savedDateStr = localStorage.getItem('selectedBookingDate');
+      const savedHijriDay = localStorage.getItem('selectedHijriDay');
+      const savedHijriMonth = localStorage.getItem('selectedHijriMonth');
+      
+      // Only proceed if we have all three values
+      if (savedDateStr && savedHijriDay && savedHijriMonth) {
+        try {
+          const savedDate = new Date(savedDateStr);
+          // Check if date is valid
+          if (isNaN(savedDate.getTime())) {
+            console.error('Invalid date from localStorage');
+            clearStoredDateData();
+            return;
+          }
+          
+          // Set the date from localStorage if it exists
+          setSelectedDate(savedDate);
+          setHijriDay(savedHijriDay);
+          setHijriMonth(savedHijriMonth);
+          
+          console.log(`Loading saved date from localStorage: ${savedHijriDay}/${savedHijriMonth}`);
+        } catch (error) {
+          console.error('Error parsing saved date:', error);
+          // Clear invalid date data
+          clearStoredDateData();
+        }
       }
     }
-  }, []);
+  }, [toast]);
   
   // Function to clear all stored date data
   const clearStoredDateData = () => {
@@ -138,31 +176,60 @@ const BookingForm = () => {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     
-    // In a real app, you would send this data to your backend
-    const bookingData = {
-      serviceId: id,
-      serviceName: service.name,
-      date: selectedDate ? formatHijriDate(selectedDate) : '',
-      time,
-      location: service.location,
-      notes,
-      image: service.image,
-      status: 'pending',
-      title: 'حجز جديد',
-      venue: service.name,
-      basePrice: basePrice,
-      taxAmount: taxAmount,
-      totalAmount: totalAmount,
-    };
+    const formattedDate = hijriDay && hijriMonth ? `${hijriDay} ${hijriMonth} 1446` : '';
     
-    console.log(bookingData);
-    
-    // Show success toast
-    toast({
-      title: "تم تأكيد الحجز بنجاح!",
-      description: "يمكنك مراجعة تفاصيل الحجز في صفحة الحجوزات",
-      variant: "default",
-    });
+    if (isEditing && editingBooking) {
+      // We're updating an existing booking
+      const updatedBooking = {
+        ...editingBooking,
+        date: formattedDate,
+        time: time,
+        notes: notes,
+        // Keep other properties the same
+      };
+      
+      // Store the updated booking in localStorage for the Bookings page to pick up
+      localStorage.setItem('editedBooking', JSON.stringify(updatedBooking));
+      
+      // Clear editing state
+      localStorage.removeItem('currentEditBooking');
+      
+      // Show success toast
+      toast({
+        title: "تم تحديث الحجز بنجاح!",
+        description: "تم تحديث تفاصيل الحجز وحفظها",
+        variant: "default",
+      });
+    } else {
+      // We're creating a new booking
+      const bookingData = {
+        serviceId: id,
+        serviceName: service.name,
+        date: formattedDate,
+        time,
+        location: service.location,
+        notes,
+        image: service.image,
+        status: 'pending',
+        title: 'حجز جديد',
+        venue: service.name,
+        basePrice: basePrice,
+        taxAmount: taxAmount,
+        totalAmount: totalAmount,
+      };
+      
+      console.log(bookingData);
+      
+      // Store the new booking in localStorage for the Bookings page to pick up
+      localStorage.setItem('newBooking', JSON.stringify(bookingData));
+      
+      // Show success toast
+      toast({
+        title: "تم تأكيد الحجز بنجاح!",
+        description: "يمكنك مراجعة تفاصيل الحجز في صفحة الحجوزات",
+        variant: "default",
+      });
+    }
     
     // Navigate to bookings page
     navigate('/bookings');
@@ -248,11 +315,11 @@ const BookingForm = () => {
   };
 
   return (
-    <Layout title="طلب الحجز" showBack>
+    <Layout title={isEditing ? "تعديل الحجز" : "طلب الحجز"} showBack>
       <div className="mb-6 flex items-center">
         <img 
-          src={service.image} 
-          alt={service.name} 
+          src={editingBooking?.image || service.image} 
+          alt={editingBooking?.venue || service.name} 
           className="w-16 h-16 rounded-full object-cover"
         />
         <div className="mr-4">
@@ -260,9 +327,9 @@ const BookingForm = () => {
             <span className="text-yellow-500 ml-1">★</span>
             <span className="font-semibold">{service.rating}</span>
           </div>
-          <h2 className="font-bold text-lg">{service.name}</h2>
+          <h2 className="font-bold text-lg">{editingBooking?.venue || service.name}</h2>
           <div className="flex items-center text-gray-600 text-sm mt-1">
-            {service.location}
+            {editingBooking?.location || service.location}
           </div>
         </div>
       </div>
@@ -277,16 +344,18 @@ const BookingForm = () => {
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-right font-normal relative",
-                    !selectedDate && "text-muted-foreground"
+                    !hijriDay && !hijriMonth && !editingBooking?.date && "text-muted-foreground"
                   )}
                 >
                   <div className="absolute top-3 right-3 text-gray-500">
                     <CalendarIcon className="w-5 h-5" />
                   </div>
                   <span className="mr-8">
-                    {selectedDate && hijriDay && hijriMonth 
-                      ? `${hijriDay} ${hijriMonth} 1446` 
-                      : "اختر التاريخ"}
+                    {hijriDay && hijriMonth 
+                      ? `${hijriDay} ${hijriMonth} 1446`
+                      : editingBooking?.date
+                        ? editingBooking.date
+                        : "اختر التاريخ"}
                   </span>
                 </Button>
               </PopoverTrigger>
@@ -370,9 +439,9 @@ const BookingForm = () => {
         <button
           type="submit"
           className="w-full mt-6 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition-colors"
-          disabled={!selectedDate || !time}
+          disabled={(!hijriDay || !hijriMonth) && !editingBooking?.date || !time}
         >
-          تأكيد الحجز
+          {isEditing ? "حفظ التعديلات" : "تأكيد الحجز"}
         </button>
       </form>
     </Layout>
