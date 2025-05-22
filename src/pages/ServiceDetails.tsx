@@ -27,10 +27,12 @@ import {
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ar } from 'date-fns/locale';
+import { useToast } from '@/hooks/use-toast';
 
 const ServiceDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [selectedPackage, setSelectedPackage] = useState<string>('gold');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedHijriDay, setSelectedHijriDay] = useState<number | null>(null);
@@ -122,9 +124,8 @@ const ServiceDetails = () => {
     ]
   };
 
-  // Load any saved date information on component mount but don't auto-select
+  // Load any saved date information on component mount
   useEffect(() => {
-    // Only load the saved date for display purposes, not auto-selection
     const savedDateStr = localStorage.getItem('selectedBookingDate');
     const savedHijriDay = localStorage.getItem('selectedHijriDay');
     const savedHijriMonth = localStorage.getItem('selectedHijriMonth');
@@ -132,15 +133,20 @@ const ServiceDetails = () => {
     if (savedDateStr && savedHijriDay && savedHijriMonth) {
       try {
         const savedDate = new Date(savedDateStr);
-        // Don't auto-set the selected date here
-        // This way we don't force selection on initial load
+        setSelectedDate(savedDate);
+        setSelectedHijriDay(parseInt(savedHijriDay));
+        setSelectedHijriMonth(savedHijriMonth);
       } catch (error) {
         console.error('Error loading saved date:', error);
+        // Clear invalid data
+        localStorage.removeItem('selectedBookingDate');
+        localStorage.removeItem('selectedHijriDay');
+        localStorage.removeItem('selectedHijriMonth');
       }
     }
   }, []);
 
-  // Parse a Hijri date string into its components - Fixed NaN issue
+  // Parse a Hijri date string into its components
   const parseHijriDate = (hijriDateStr: string) => {
     if (!hijriDateStr) return null;
     
@@ -177,6 +183,11 @@ const ServiceDetails = () => {
       localStorage.removeItem('selectedHijriDay');
       localStorage.removeItem('selectedHijriMonth');
       
+      toast({
+        title: "تم إلغاء اختيار التاريخ",
+        description: "تم إلغاء تاريخ الحجز بنجاح",
+      });
+      
       setCalendarOpen(false);
       return;
     }
@@ -202,6 +213,11 @@ const ServiceDetails = () => {
       localStorage.setItem('selectedBookingDate', date.toISOString());
       localStorage.setItem('selectedHijriDay', parsedDate.day.toString());
       localStorage.setItem('selectedHijriMonth', parsedDate.month);
+      
+      toast({
+        title: "تم اختيار التاريخ",
+        description: `تم اختيار ${parsedDate.day} ${parsedDate.month} كتاريخ للحجز`,
+      });
     }
     
     setCalendarOpen(false);
@@ -221,13 +237,8 @@ const ServiceDetails = () => {
     return selectedHijriDay === day && selectedHijriMonth === month;
   };
 
-  // Sets a specific date as selected by its Hijri day and month
-  // This version is read-only - selection can only be done from calendar view
-  const selectDateByHijri = (day: number, month: string) => {
-    // We no longer allow selection from the available dates directly
-    // Only displaying the available dates provided by vendor
-    
-    // Instead, we'll open the calendar when an available date is clicked
+  // Handle click on an available date - now just opens calendar
+  const handleDateClick = () => {
     setCalendarOpen(true);
   };
 
@@ -355,7 +366,13 @@ const ServiceDetails = () => {
                     ? 'border-munaasib-gold bg-munaasib-lightGold' 
                     : 'border-gray-200'
                 }`}
-                onClick={() => setSelectedPackage(pkg.id)}
+                onClick={() => {
+                  setSelectedPackage(pkg.id);
+                  toast({
+                    title: "تم اختيار الباقة",
+                    description: `تم اختيار ${pkg.name}`,
+                  });
+                }}
               >
                 <div className="flex justify-between">
                   <h3 className="font-bold">{pkg.name}</h3>
@@ -418,12 +435,12 @@ const ServiceDetails = () => {
               {availableDates.map((date, index) => (
                 <button 
                   key={`${date.day}-${date.month}-${index}`}
+                  onClick={handleDateClick}
                   className={`border rounded-lg p-4 flex flex-col items-center min-w-[80px] focus:outline-none transition-colors ${
                     isDateSelected(date.day, date.month) 
                       ? 'border-green-500 bg-green-50 text-green-700'  
                       : 'bg-white border-gray-200'
-                  } cursor-default`}
-                  onClick={() => setCalendarOpen(true)}
+                  }`}
                 >
                   <span className="text-lg font-bold">{date.day}</span>
                   <span className="text-gray-500" dir="rtl">
@@ -469,9 +486,12 @@ const ServiceDetails = () => {
         <div className="sticky bottom-20 left-0 right-0 bg-white pt-4 pb-4 mt-8">
           <button
             onClick={handleBookNow}
-            className="block w-full bg-green-600 text-white text-center py-3 rounded-lg font-bold hover:bg-green-700 transition-colors"
+            className={`block w-full text-white text-center py-3 rounded-lg font-bold transition-colors ${
+              selectedDate ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'
+            }`}
+            disabled={!selectedDate}
           >
-            احجز الآن
+            {selectedDate ? 'احجز الآن' : 'الرجاء اختيار تاريخ'}
           </button>
         </div>
       </div>

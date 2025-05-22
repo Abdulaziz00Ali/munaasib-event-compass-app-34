@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Pencil, Trash2, Clock, Calendar as CalendarIcon, Plus, X } from 'lucide-react';
+import { Pencil, Trash2, Clock, Calendar as CalendarIcon, Plus, X, CalendarPlus, CalendarX } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { ar } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -170,6 +170,34 @@ const VendorDashboard = () => {
     setCalendarOpen(false);
   };
   
+  // Bulk add dates to available dates
+  const handleAddMultipleDates = () => {
+    // This would open a more complex UI component for date range selection
+    // For now, just show a toast notification about the feature
+    toast({
+      title: "إضافة مواعيد متعددة",
+      description: "هذه الميزة ستكون متاحة قريباً",
+    });
+  };
+  
+  // Clear all available dates
+  const handleClearAllDates = () => {
+    if (availableDates.length === 0) {
+      toast({
+        title: "لا توجد مواعيد",
+        description: "لا توجد مواعيد متاحة للحذف",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setAvailableDates([]);
+    toast({
+      title: "تم حذف جميع المواعيد",
+      description: "تم حذف جميع المواعيد المتاحة بنجاح",
+    });
+  };
+  
   // Remove a date from available dates
   const removeDate = (day: number, month: string) => {
     setAvailableDates(prev => 
@@ -210,44 +238,61 @@ const VendorDashboard = () => {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">إدارة المواعيد المتاحة</h2>
-          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-            <PopoverTrigger asChild>
-              <Button className="bg-munaasib-red">
-                <Plus className="h-4 w-4 mr-2" /> إضافة موعد
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={handleDateSelect}
-                locale={ar}
-                className="p-3 pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
+          <div className="flex space-x-2 space-x-reverse">
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button className="bg-munaasib-red">
+                  <Plus className="h-4 w-4 ml-2" /> إضافة موعد
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={handleDateSelect}
+                  locale={ar}
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+            
+            <Button onClick={handleAddMultipleDates} variant="outline" title="إضافة مواعيد متعددة">
+              <CalendarPlus className="h-4 w-4" />
+            </Button>
+            
+            <Button onClick={handleClearAllDates} variant="outline" className="text-red-500" title="حذف جميع المواعيد">
+              <CalendarX className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         <div className="bg-white p-4 rounded-lg shadow-sm">
-          <div className="grid grid-cols-4 gap-2">
-            {availableDates.map((date, index) => (
-              <div 
-                key={`${date.day}-${date.month}-${index}`}
-                className="border rounded-lg p-3 flex flex-col items-center relative"
-              >
-                <button 
-                  className="absolute top-1 left-1 text-gray-400 hover:text-red-500"
-                  onClick={() => removeDate(date.day, date.month)}
+          {availableDates.length > 0 ? (
+            <div className="grid grid-cols-4 gap-2">
+              {availableDates.map((date, index) => (
+                <div 
+                  key={`${date.day}-${date.month}-${index}`}
+                  className="border rounded-lg p-3 flex flex-col items-center relative"
                 >
-                  <X className="h-4 w-4" />
-                </button>
-                <span className="text-lg font-bold">{date.day}</span>
-                <span className="text-gray-500 text-sm" dir="rtl">
-                  {date.month}
-                </span>
-              </div>
-            ))}
-          </div>
+                  <button 
+                    className="absolute top-1 left-1 text-gray-400 hover:text-red-500"
+                    onClick={() => removeDate(date.day, date.month)}
+                    title="حذف هذا التاريخ"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  <span className="text-lg font-bold">{date.day}</span>
+                  <span className="text-gray-500 text-sm" dir="rtl">
+                    {date.month}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              لا توجد مواعيد متاحة. أضف مواعيد جديدة باستخدام زر "إضافة موعد"
+            </div>
+          )}
         </div>
       </div>
 

@@ -29,16 +29,20 @@ const BookingForm = () => {
     const savedHijriDay = localStorage.getItem('selectedHijriDay');
     const savedHijriMonth = localStorage.getItem('selectedHijriMonth');
     
-    if (savedDateStr) {
+    if (savedDateStr && savedHijriDay && savedHijriMonth) {
       try {
         const savedDate = new Date(savedDateStr);
         
-        // Always set the date from localStorage if it exists
+        // Set the date from localStorage if it exists
         setSelectedDate(savedDate);
         
         console.log(`Loading saved date from localStorage: ${savedHijriDay}/${savedHijriMonth}`);
       } catch (error) {
         console.error('Error parsing saved date:', error);
+        // Clear invalid date data
+        localStorage.removeItem('selectedBookingDate');
+        localStorage.removeItem('selectedHijriDay');
+        localStorage.removeItem('selectedHijriMonth');
       }
     }
   }, []);
@@ -123,7 +127,7 @@ const BookingForm = () => {
     
     console.log(bookingData);
     
-    // Show success toast - changing variant from "success" to "default"
+    // Show success toast
     toast({
       title: "تم تأكيد الحجز بنجاح!",
       description: "يمكنك مراجعة تفاصيل الحجز في صفحة الحجوزات",
@@ -162,7 +166,6 @@ const BookingForm = () => {
     setSelectedDate(date);
     setDateOpen(false);
     
-    // Update localStorage when date is changed in booking form
     if (date) {
       // Format the Gregorian date to Hijri to get day and month
       const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
@@ -170,7 +173,7 @@ const BookingForm = () => {
         month: 'long',
       }).format(date);
       
-      // Parse the Hijri date components using a similar function to ServiceDetails
+      // Parse the Hijri date components
       const dayMatch = hijriDate.match(/^(\d+)/);
       const day = dayMatch ? parseInt(dayMatch[1], 10) : null;
       
@@ -189,10 +192,21 @@ const BookingForm = () => {
       if (month) {
         localStorage.setItem('selectedHijriMonth', month);
       }
+      
+      toast({
+        title: "تم اختيار التاريخ",
+        description: `تم اختيار ${day} ${month} كتاريخ للحجز`,
+      });
     } else {
+      // Clear localStorage if date is cleared
       localStorage.removeItem('selectedBookingDate');
       localStorage.removeItem('selectedHijriDay');
       localStorage.removeItem('selectedHijriMonth');
+      
+      toast({
+        title: "تم إلغاء اختيار التاريخ",
+        description: "يرجى اختيار تاريخ جديد للحجز",
+      });
     }
   };
   
@@ -200,6 +214,11 @@ const BookingForm = () => {
   const handleTimeSelect = (selectedTime: string) => {
     setTime(selectedTime);
     setTimeOpen(false);
+    
+    toast({
+      title: "تم اختيار الوقت",
+      description: `تم اختيار ${selectedTime} كوقت للحجز`,
+    });
   };
 
   return (
@@ -323,6 +342,7 @@ const BookingForm = () => {
         <button
           type="submit"
           className="w-full mt-6 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition-colors"
+          disabled={!selectedDate || !time}
         >
           تأكيد الحجز
         </button>
