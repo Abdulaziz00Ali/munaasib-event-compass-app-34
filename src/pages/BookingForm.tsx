@@ -28,13 +28,30 @@ const BookingForm = () => {
   
   // Check for saved date in localStorage on component mount
   useEffect(() => {
+    const clearStoredDate = () => {
+      localStorage.removeItem('selectedBookingDate');
+      localStorage.removeItem('selectedHijriDay');
+      localStorage.removeItem('selectedHijriMonth');
+      setSelectedDate(undefined);
+      setHijriDay(null);
+      setHijriMonth(null);
+    };
+    
+    // Try to get date from localStorage
     const savedDateStr = localStorage.getItem('selectedBookingDate');
     const savedHijriDay = localStorage.getItem('selectedHijriDay');
     const savedHijriMonth = localStorage.getItem('selectedHijriMonth');
     
+    // Only proceed if we have all three values
     if (savedDateStr && savedHijriDay && savedHijriMonth) {
       try {
         const savedDate = new Date(savedDateStr);
+        // Check if date is valid
+        if (isNaN(savedDate.getTime())) {
+          console.error('Invalid date from localStorage');
+          clearStoredDate();
+          return;
+        }
         
         // Set the date from localStorage if it exists
         setSelectedDate(savedDate);
@@ -45,7 +62,7 @@ const BookingForm = () => {
       } catch (error) {
         console.error('Error parsing saved date:', error);
         // Clear invalid date data
-        clearStoredDateData();
+        clearStoredDate();
       }
     }
   }, []);
@@ -171,57 +188,52 @@ const BookingForm = () => {
   
   // Handle date selection and close the popover
   const handleDateSelect = (date: Date | undefined) => {
-    setSelectedDate(date);
-    setDateOpen(false);
-    
-    if (date) {
-      // Format the Gregorian date to Hijri to get day and month
-      const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
-        day: 'numeric',
-        month: 'long',
-      }).format(date);
-      
-      // Parse the Hijri date components
-      const dayMatch = hijriDate.match(/^(\d+)/);
-      const day = dayMatch ? dayMatch[0] : null;
-      
-      let month = null;
-      if (dayMatch && dayMatch.index !== undefined) {
-        const startPos = dayMatch.index + dayMatch[0].length;
-        month = hijriDate.substring(startPos).trim();
-      }
-      
-      // Set the state values
-      setHijriDay(day);
-      setHijriMonth(month);
-      
-      // Store the values in localStorage
-      localStorage.setItem('selectedBookingDate', date.toISOString());
-      
-      if (day !== null) {
-        localStorage.setItem('selectedHijriDay', day);
-      }
-      
-      if (month) {
-        localStorage.setItem('selectedHijriMonth', month);
-      }
-      
-      // Only show toast if both day and month are available
-      if (day && month) {
-        toast({
-          title: "تم اختيار التاريخ",
-          description: `تم اختيار ${day} ${month} كتاريخ للحجز`,
-        });
-      }
-    } else {
-      // Clear localStorage if date is cleared
+    if (!date) {
       clearStoredDateData();
+      setDateOpen(false);
       
       toast({
         title: "تم إلغاء اختيار التاريخ",
         description: "يرجى اختيار تاريخ جديد للحجز",
       });
+      return;
     }
+    
+    // Format the date to Hijri to get day and month
+    const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+      day: 'numeric',
+      month: 'long',
+    }).format(date);
+    
+    // Parse the Hijri date components
+    const parts = hijriDate.split(' ');
+    const day = parts[0];
+    const month = parts.length > 1 ? parts.slice(1).join(' ') : '';
+    
+    if (day && month) {
+      // Update state
+      setSelectedDate(date);
+      setHijriDay(day);
+      setHijriMonth(month);
+      
+      // Store in localStorage
+      localStorage.setItem('selectedBookingDate', date.toISOString());
+      localStorage.setItem('selectedHijriDay', day);
+      localStorage.setItem('selectedHijriMonth', month);
+      
+      toast({
+        title: "تم اختيار التاريخ",
+        description: `تم اختيار ${day} ${month} كتاريخ للحجز`,
+      });
+    } else {
+      toast({
+        title: "خطأ في تنسيق التاريخ",
+        description: "تعذر تحليل التاريخ الهجري بشكل صحيح",
+        variant: "destructive",
+      });
+    }
+    
+    setDateOpen(false);
   };
   
   // Handle time selection and close the popover

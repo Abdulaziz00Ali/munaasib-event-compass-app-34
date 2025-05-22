@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -28,11 +29,15 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ar } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
+import { useUserType } from '@/hooks/useUserType';
 
 const ServiceDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { userType } = useUserType();
+  const isVendor = userType === 'vendor';
+  
   const [selectedPackage, setSelectedPackage] = useState<string>('gold');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedHijriDay, setSelectedHijriDay] = useState<string | null>(null);
@@ -133,6 +138,11 @@ const ServiceDetails = () => {
     if (savedDateStr && savedHijriDay && savedHijriMonth) {
       try {
         const savedDate = new Date(savedDateStr);
+        if (isNaN(savedDate.getTime())) {
+          console.error('Invalid date loaded from localStorage');
+          clearStoredDateData();
+          return;
+        }
         setSelectedDate(savedDate);
         setSelectedHijriDay(savedHijriDay);
         setSelectedHijriMonth(savedHijriMonth);
@@ -158,16 +168,9 @@ const ServiceDetails = () => {
   const parseHijriDate = (hijriDateStr: string) => {
     if (!hijriDateStr) return { day: null, month: null };
     
-    // Extract the numeric day value using regex
-    const dayMatch = hijriDateStr.match(/^(\d+)/);
-    const day = dayMatch ? dayMatch[0] : null;
-    
-    // Extract the month name (everything after the day number)
-    let month = null;
-    if (dayMatch && dayMatch.index !== undefined) {
-      const startPos = dayMatch.index + dayMatch[0].length;
-      month = hijriDateStr.substring(startPos).trim();
-    }
+    const parts = hijriDateStr.split(' ');
+    const day = parts[0];
+    const month = parts.length > 1 ? parts.slice(1).join(' ') : null;
     
     return { day, month };
   };
@@ -193,7 +196,9 @@ const ServiceDetails = () => {
     }).format(date);
     
     // Parse the Hijri date components
-    const { day, month } = parseHijriDate(hijriDate);
+    const parts = hijriDate.split(' ');
+    const day = parts[0];
+    const month = parts.length > 1 ? parts.slice(1).join(' ') : '';
     
     if (day && month) {
       // Set the selected Hijri day and month
@@ -271,6 +276,39 @@ const ServiceDetails = () => {
     toast({
       title: "تم اختيار التاريخ",
       description: `تم اختيار ${dayStr} ${month} كتاريخ للحجز`,
+    });
+  };
+  
+  // Add a new available date (for vendor only)
+  const handleAddDate = () => {
+    if (!isVendor) return;
+    
+    // In a real app, this would be connected to a date picker
+    // For now, just add a hardcoded new date for demo purposes
+    const newDate = {
+      day: 25,
+      month: 'ذو القعدة',
+      year: 1446
+    };
+    
+    setAvailableDates(prev => [...prev, newDate]);
+    
+    toast({
+      title: "تم إضافة تاريخ جديد",
+      description: `تم إضافة ${newDate.day} ${newDate.month} إلى المواعيد المتاحة`,
+    });
+  };
+  
+  // Remove an available date (for vendor only)
+  const handleRemoveDate = (index: number) => {
+    if (!isVendor) return;
+    
+    const dateToRemove = availableDates[index];
+    setAvailableDates(prev => prev.filter((_, i) => i !== index));
+    
+    toast({
+      title: "تم حذف التاريخ",
+      description: `تم حذف ${dateToRemove.day} ${dateToRemove.month} من المواعيد المتاحة`,
     });
   };
 
@@ -435,54 +473,40 @@ const ServiceDetails = () => {
           </div>
         </div>
         
-        {/* Available Dates */}
-        <div className="mt-6">
-          <h2 className="text-lg font-bold mb-2">المواعيد المتاحة</h2>
-          
-          <div className="relative">
-            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-              <div className="flex justify-between mb-2">
-                <span className="font-medium">شهر {availableDates[0]?.month || "ذو القعدة"}</span>
-                <PopoverTrigger asChild>
-                  <button 
-                    className="text-munaasib-red flex items-center text-sm"
-                  >
-                    <Calendar className="w-4 h-4 ml-1" />
-                    عرض التقويم
-                  </button>
-                </PopoverTrigger>
-              </div>
-              <PopoverContent className="w-auto p-0 z-50" align="end">
-                <CalendarComponent
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={handleDateSelect}
-                  className="p-3 pointer-events-auto"
-                  locale={ar}
-                />
-              </PopoverContent>
-            </Popover>
+        {/* Available Dates - Only visible to vendors */}
+        {isVendor && (
+          <div className="mt-6">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-lg font-bold">إدارة المواعيد المتاحة</h2>
+              <button 
+                onClick={handleAddDate}
+                className="text-white bg-green-600 rounded-lg px-3 py-1 text-sm"
+              >
+                إضافة موعد
+              </button>
+            </div>
             
             <div className="flex gap-3 overflow-x-auto pb-2">
               {availableDates.map((date, index) => (
-                <button 
+                <div 
                   key={`${date.day}-${date.month}-${index}`}
-                  onClick={() => handleDateClick(date.day, date.month)}
-                  className={`border rounded-lg p-4 flex flex-col items-center min-w-[80px] focus:outline-none transition-colors ${
-                    isDateSelected(date.day, date.month) 
-                      ? 'border-green-500 bg-green-50 text-green-700'  
-                      : 'bg-white border-gray-200'
-                  }`}
+                  className="relative border rounded-lg p-4 flex flex-col items-center min-w-[80px] bg-white border-gray-200"
                 >
+                  <button 
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
+                    onClick={() => handleRemoveDate(index)}
+                  >
+                    ×
+                  </button>
                   <span className="text-lg font-bold">{date.day}</span>
                   <span className="text-gray-500" dir="rtl">
                     {date.month}
                   </span>
-                </button>
+                </div>
               ))}
             </div>
           </div>
-        </div>
+        )}
         
         {/* Reviews */}
         <div className="mt-6">
@@ -518,12 +542,9 @@ const ServiceDetails = () => {
         <div className="sticky bottom-20 left-0 right-0 bg-white pt-4 pb-4 mt-8">
           <button
             onClick={handleBookNow}
-            className={`block w-full text-white text-center py-3 rounded-lg font-bold transition-colors ${
-              selectedDate ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'
-            }`}
-            disabled={!selectedDate}
+            className="block w-full text-white text-center py-3 rounded-lg font-bold transition-colors bg-green-600 hover:bg-green-700"
           >
-            {selectedDate ? 'احجز الآن' : 'الرجاء اختيار تاريخ'}
+            احجز الآن
           </button>
         </div>
       </div>

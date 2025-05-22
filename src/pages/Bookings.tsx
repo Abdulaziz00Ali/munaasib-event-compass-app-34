@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import BookingCard from '@/components/ui/BookingCard';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 const Bookings = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const [upcomingBookingsList, setUpcomingBookingsList] = useState([
     {
@@ -67,6 +68,12 @@ const Bookings = () => {
   const handleEditBooking = (id: string) => {
     // Navigation to edit page is now handled in the BookingCard component
     console.log('Editing booking:', id);
+    
+    // Show toast notification
+    toast({
+      title: "تم فتح التعديل",
+      description: "يمكنك تعديل تفاصيل الحجز الآن",
+    });
   };
   
   const handleCancelBooking = (id: string) => {
@@ -87,6 +94,16 @@ const Bookings = () => {
     });
   };
 
+  const handleTabChange = (tab: 'upcoming' | 'past') => {
+    setActiveTab(tab);
+    
+    // Show toast notification
+    toast({
+      title: tab === 'upcoming' ? "الحجوزات القادمة" : "الحجوزات السابقة",
+      description: `تم الانتقال إلى ${tab === 'upcoming' ? "الحجوزات القادمة" : "الحجوزات السابقة"}`,
+    });
+  };
+
   return (
     <Layout title="حجوزاتي">
       <div className="flex border-b border-gray-200 mb-4">
@@ -96,7 +113,7 @@ const Bookings = () => {
               ? 'text-munaasib-red border-b-2 border-munaasib-red'
               : 'text-gray-500'
           }`}
-          onClick={() => setActiveTab('upcoming')}
+          onClick={() => handleTabChange('upcoming')}
         >
           الحجوزات القادمة
         </button>
@@ -106,7 +123,7 @@ const Bookings = () => {
               ? 'text-munaasib-red border-b-2 border-munaasib-red'
               : 'text-gray-500'
           }`}
-          onClick={() => setActiveTab('past')}
+          onClick={() => handleTabChange('past')}
         >
           الحجوزات السابقة
         </button>
