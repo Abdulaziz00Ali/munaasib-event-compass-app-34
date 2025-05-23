@@ -44,7 +44,7 @@ const Profile = () => {
           </svg>
         </Link>
 
-        <Link to="/notifications/settings" className="flex items-center justify-between p-4">
+        <Link to="/notifications" className="flex items-center justify-between p-4">
           <div className="flex items-center">
             <Bell className="w-6 h-6 ml-4 text-gray-600" />
             <span className="font-medium">الإشعارات</span>

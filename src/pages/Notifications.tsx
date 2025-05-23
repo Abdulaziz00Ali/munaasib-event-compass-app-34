@@ -39,27 +39,35 @@ const Notifications = () => {
 
   return (
     <Layout title="الإشعارات" showBack>
-      <div>
-        <h2 className="text-gray-500 mb-4">اليوم</h2>
-        {todayNotifications.map((notification, index) => (
-          <NotificationItem
-            key={index}
-            type={notification.type}
-            title={notification.title}
-            time={notification.time}
-          />
-        ))}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-600 mb-4">اليوم</h2>
+          <div className="space-y-3">
+            {todayNotifications.map((notification, index) => (
+              <NotificationItem
+                key={index}
+                type={notification.type}
+                title={notification.title}
+                time={notification.time}
+              />
+            ))}
+          </div>
+        </div>
 
-        <h2 className="text-gray-500 my-4">الأسبوع الماضي</h2>
-        {lastWeekNotifications.map((notification, index) => (
-          <NotificationItem
-            key={index}
-            type={notification.type}
-            title={notification.title}
-            time={notification.time}
-            date={notification.date}
-          />
-        ))}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-600 mb-4 mt-8">الأسبوع الماضي</h2>
+          <div className="space-y-3">
+            {lastWeekNotifications.map((notification, index) => (
+              <NotificationItem
+                key={index}
+                type={notification.type}
+                title={notification.title}
+                time={notification.time}
+                date={notification.date}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </Layout>
   );
