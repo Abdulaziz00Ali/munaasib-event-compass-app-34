@@ -30,6 +30,38 @@ const VendorDashboard = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const { toast } = useToast();
   
+  // Helper function to convert Gregorian date to Hijri
+  const convertToHijri = (gregorianDate: Date) => {
+    try {
+      // Create a proper Hijri date using Intl.DateTimeFormat
+      const hijriFormatter = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+      
+      const hijriParts = hijriFormatter.formatToParts(gregorianDate);
+      
+      console.log('Hijri parts:', hijriParts);
+      
+      const day = parseInt(hijriParts.find(part => part.type === 'day')?.value || '1');
+      const month = hijriParts.find(part => part.type === 'month')?.value || 'ذو القعدة';
+      const year = parseInt(hijriParts.find(part => part.type === 'year')?.value || '1446');
+      
+      console.log('Converted Hijri date:', { day, month, year });
+      
+      return { day, month, year };
+    } catch (error) {
+      console.error('Error converting to Hijri:', error);
+      // Fallback to a simple approximation
+      return {
+        day: gregorianDate.getDate(),
+        month: 'ذو القعدة',
+        year: 1446
+      };
+    }
+  };
+  
   const services = [
     {
       id: 1,
@@ -105,38 +137,38 @@ const VendorDashboard = () => {
     }
     
     try {
-      // Use the selected date to create a proper date entry
-      const day = date.getDate();
-      const month = 'ذو القعدة'; // Using a fixed month for simplicity
-      const year = 1446;
+      // Convert the selected Gregorian date to Hijri
+      const hijriDate = convertToHijri(date);
       
-      console.log('Creating date entry:', { day, month, year });
+      console.log('Selected Gregorian date:', date);
+      console.log('Converted to Hijri:', hijriDate);
       
       // Check if this exact date already exists
       const dateExists = availableDates.some(
-        existingDate => existingDate.day === day && existingDate.month === month && existingDate.year === year
+        existingDate => existingDate.day === hijriDate.day && 
+                       existingDate.month === hijriDate.month && 
+                       existingDate.year === hijriDate.year
       );
       
       console.log('Date exists?', dateExists);
       
       if (!dateExists) {
-        const newDate = { day, month, year };
-        const updatedDates = [...availableDates, newDate];
+        const updatedDates = [...availableDates, hijriDate];
         
-        console.log('Adding new date:', newDate);
+        console.log('Adding new Hijri date:', hijriDate);
         console.log('Updated dates array:', updatedDates);
         
         setAvailableDates(updatedDates);
         
         toast({
           title: "تمت إضافة التاريخ بنجاح",
-          description: `تم إضافة ${day} ${month} ${year} إلى المواعيد المتاحة`,
+          description: `تم إضافة ${hijriDate.day} ${hijriDate.month} ${hijriDate.year} إلى المواعيد المتاحة`,
         });
       } else {
         console.log('Date already exists, showing error toast');
         toast({
           title: "التاريخ موجود بالفعل",
-          description: `${day} ${month} ${year} مضاف مسبقاً في المواعيد المتاحة`,
+          description: `${hijriDate.day} ${hijriDate.month} ${hijriDate.year} مضاف مسبقاً في المواعيد المتاحة`,
           variant: "destructive",
         });
       }
