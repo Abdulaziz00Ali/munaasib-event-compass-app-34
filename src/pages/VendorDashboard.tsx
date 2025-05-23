@@ -95,78 +95,57 @@ const VendorDashboard = () => {
     },
   ];
   
-  // Parse a Hijri date string into its components
-  const parseHijriDate = (hijriDateStr: string) => {
-    if (!hijriDateStr) return null;
-    
-    // Extract the numeric day value using regex
-    const dayMatch = hijriDateStr.match(/^(\d+)/);
-    const day = dayMatch ? parseInt(dayMatch[0], 10) : null;
-    
-    // Extract the month name (everything after the day number)
-    let month = null;
-    if (dayMatch && dayMatch.index !== undefined) {
-      const startPos = dayMatch.index + dayMatch[0].length;
-      month = hijriDateStr.substring(startPos).trim();
-    }
-    
-    if (day !== null && month) {
-      return {
-        day,
-        month,
-        year: 1446 // Default value for the year
-      };
-    }
-    return null;
-  };
-  
   // Handle adding a new available date
   const handleDateSelect = (date: Date | undefined) => {
+    console.log('Date selected:', date);
+    
     if (!date) {
       setSelectedDate(undefined);
       return;
     }
     
-    // Format the Gregorian date to Hijri
-    const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic', {
-      day: 'numeric',
-      month: 'long',
-    }).format(date);
-    
-    // Parse the Hijri date components
-    const parsedDate = parseHijriDate(hijriDate);
-    
-    if (parsedDate) {
+    try {
+      // Simple approach: use the day number and a default month
+      const day = date.getDate();
+      const month = 'ذو القعدة'; // Default month for now
+      const year = 1446; // Default year
+      
+      console.log('Processing date:', { day, month, year });
+      
       // Check if date already exists
       const dateExists = availableDates.some(
-        d => d.day === parsedDate.day && d.month === parsedDate.month
+        d => d.day === day && d.month === month
       );
       
       if (!dateExists) {
         // Create new array with added date
-        const newDates = [
-          ...availableDates,
-          {
-            day: parsedDate.day,
-            month: parsedDate.month,
-            year: parsedDate.year
-          }
-        ];
+        const newDate = { day, month, year };
+        const newDates = [...availableDates, newDate];
+        
+        console.log('Adding new date:', newDate);
+        console.log('Updated dates:', newDates);
         
         // Update state
         setAvailableDates(newDates);
         
         toast({
           title: "تمت إضافة التاريخ بنجاح",
-          description: `تم إضافة ${parsedDate.day} ${parsedDate.month} إلى المواعيد المتاحة`,
+          description: `تم إضافة ${day} ${month} إلى المواعيد المتاحة`,
         });
       } else {
         toast({
           title: "التاريخ موجود بالفعل",
-          description: `${parsedDate.day} ${parsedDate.month} مضاف مسبقاً في المواعيد المتاحة`,
+          description: `${day} ${month} مضاف مسبقاً في المواعيد المتاحة`,
           variant: "destructive",
         });
       }
+    } catch (error) {
+      console.error('Error processing date:', error);
+      toast({
+        title: "خطأ في إضافة التاريخ",
+        description: "حدث خطأ أثناء إضافة التاريخ، يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
     }
     
     setSelectedDate(undefined);
