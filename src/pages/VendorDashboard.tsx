@@ -30,6 +30,23 @@ const VendorDashboard = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const { toast } = useToast();
   
+  // Helper function to convert Arabic-Indic numerals to regular numbers
+  const convertArabicNumerals = (arabicNumber: string): number => {
+    const arabicToEnglish: { [key: string]: string } = {
+      '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+      '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+    };
+    
+    let englishNumber = arabicNumber;
+    for (const [arabic, english] of Object.entries(arabicToEnglish)) {
+      englishNumber = englishNumber.replace(new RegExp(arabic, 'g'), english);
+    }
+    
+    const result = parseInt(englishNumber, 10);
+    console.log(`Converting "${arabicNumber}" to ${result}`);
+    return result;
+  };
+  
   // Helper function to convert Gregorian date to Hijri
   const convertToHijri = (gregorianDate: Date) => {
     try {
@@ -44,11 +61,21 @@ const VendorDashboard = () => {
       
       console.log('Hijri parts:', hijriParts);
       
-      const day = parseInt(hijriParts.find(part => part.type === 'day')?.value || '1');
-      const month = hijriParts.find(part => part.type === 'month')?.value || 'ذو القعدة';
-      const year = parseInt(hijriParts.find(part => part.type === 'year')?.value || '1446');
+      const dayPart = hijriParts.find(part => part.type === 'day')?.value || '1';
+      const monthPart = hijriParts.find(part => part.type === 'month')?.value || 'ذو القعدة';
+      const yearPart = hijriParts.find(part => part.type === 'year')?.value || '1446';
+      
+      // Convert Arabic numerals to regular numbers
+      const day = convertArabicNumerals(dayPart);
+      const year = convertArabicNumerals(yearPart);
+      const month = monthPart;
       
       console.log('Converted Hijri date:', { day, month, year });
+      
+      // Validate the conversion
+      if (isNaN(day) || isNaN(year)) {
+        throw new Error('Failed to convert Arabic numerals');
+      }
       
       return { day, month, year };
     } catch (error) {
@@ -61,7 +88,7 @@ const VendorDashboard = () => {
       };
     }
   };
-  
+
   const services = [
     {
       id: 1,
