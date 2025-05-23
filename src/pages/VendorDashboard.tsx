@@ -26,7 +26,7 @@ const VendorDashboard = () => {
     { day: 20, month: 'ذو القعدة', year: 1446 },
   ]);
   
-  const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const { toast } = useToast();
   
@@ -97,50 +97,51 @@ const VendorDashboard = () => {
   
   // Handle adding a new available date
   const handleDateSelect = (date: Date | undefined) => {
-    console.log('Date selected:', date);
+    console.log('handleDateSelect called with:', date);
     
     if (!date) {
-      setSelectedDate(undefined);
+      console.log('No date selected, returning');
       return;
     }
     
     try {
-      // Simple approach: use the day number and a default month
+      // Use the selected date to create a proper date entry
       const day = date.getDate();
-      const month = 'ذو القعدة'; // Default month for now
-      const year = 1446; // Default year
+      const month = 'ذو القعدة'; // Using a fixed month for simplicity
+      const year = 1446;
       
-      console.log('Processing date:', { day, month, year });
+      console.log('Creating date entry:', { day, month, year });
       
-      // Check if date already exists
+      // Check if this exact date already exists
       const dateExists = availableDates.some(
-        d => d.day === day && d.month === month
+        existingDate => existingDate.day === day && existingDate.month === month && existingDate.year === year
       );
       
+      console.log('Date exists?', dateExists);
+      
       if (!dateExists) {
-        // Create new array with added date
         const newDate = { day, month, year };
-        const newDates = [...availableDates, newDate];
+        const updatedDates = [...availableDates, newDate];
         
         console.log('Adding new date:', newDate);
-        console.log('Updated dates:', newDates);
+        console.log('Updated dates array:', updatedDates);
         
-        // Update state
-        setAvailableDates(newDates);
+        setAvailableDates(updatedDates);
         
         toast({
           title: "تمت إضافة التاريخ بنجاح",
-          description: `تم إضافة ${day} ${month} إلى المواعيد المتاحة`,
+          description: `تم إضافة ${day} ${month} ${year} إلى المواعيد المتاحة`,
         });
       } else {
+        console.log('Date already exists, showing error toast');
         toast({
           title: "التاريخ موجود بالفعل",
-          description: `${day} ${month} مضاف مسبقاً في المواعيد المتاحة`,
+          description: `${day} ${month} ${year} مضاف مسبقاً في المواعيد المتاحة`,
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Error processing date:', error);
+      console.error('Error in handleDateSelect:', error);
       toast({
         title: "خطأ في إضافة التاريخ",
         description: "حدث خطأ أثناء إضافة التاريخ، يرجى المحاولة مرة أخرى",
@@ -148,13 +149,13 @@ const VendorDashboard = () => {
       });
     }
     
-    setSelectedDate(undefined);
+    // Always close the popover and reset selection
     setCalendarOpen(false);
+    setSelectedDate(undefined);
   };
   
   // Bulk add dates to available dates
   const handleAddMultipleDates = () => {
-    // This would open a more complex UI component for date range selection
     toast({
       title: "إضافة مواعيد متعددة",
       description: "هذه الميزة ستكون متاحة قريباً",
@@ -224,7 +225,13 @@ const VendorDashboard = () => {
           <div className="flex space-x-2 space-x-reverse">
             <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
               <PopoverTrigger asChild>
-                <Button className="bg-munaasib-red">
+                <Button 
+                  className="bg-munaasib-red hover:bg-munaasib-red/90"
+                  onClick={() => {
+                    console.log('Add date button clicked');
+                    setCalendarOpen(true);
+                  }}
+                >
                   <Plus className="h-4 w-4 ml-2" /> إضافة موعد
                 </Button>
               </PopoverTrigger>
@@ -232,9 +239,14 @@ const VendorDashboard = () => {
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={handleDateSelect}
+                  onSelect={(date) => {
+                    console.log('Calendar onSelect called with:', date);
+                    setSelectedDate(date);
+                    handleDateSelect(date);
+                  }}
                   locale={ar}
-                  className="p-3 pointer-events-auto"
+                  className="p-3"
+                  disabled={(date) => date < new Date()}
                 />
               </PopoverContent>
             </Popover>
