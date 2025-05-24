@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import BookingCard from '@/components/ui/BookingCard';
@@ -203,26 +202,28 @@ const Bookings = () => {
 
   return (
     <Layout title="حجوزاتي">
-      {/* Messages Section */}
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg">الرسائل</h3>
-          <Link to="/messages" className="text-munaasib-red text-sm">عرض الكل</Link>
-        </div>
-        
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-            <div className="w-10 h-10 bg-munaasib-red rounded-full flex items-center justify-center">
-              <MessageCircle className="w-5 h-5 text-white" />
+      {/* Messages Section - Make entire section clickable */}
+      <Link to="/messages" className="block">
+        <div className="bg-white rounded-lg shadow-sm p-4 mb-6 hover:shadow-md transition-shadow cursor-pointer">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-lg">الرسائل</h3>
+            <span className="text-munaasib-red text-sm">عرض الكل</span>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="w-10 h-10 bg-munaasib-red rounded-full flex items-center justify-center">
+                <MessageCircle className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-medium text-sm">مطبخ الأصالة</h4>
+                <p className="text-xs text-gray-600">بخصوص حجز الخميس...</p>
+              </div>
+              <span className="text-xs text-gray-500">منذ 30 دقيقة</span>
             </div>
-            <div className="flex-1">
-              <h4 className="font-medium text-sm">مطبخ الأصالة</h4>
-              <p className="text-xs text-gray-600">بخصوص حجز الخميس...</p>
-            </div>
-            <span className="text-xs text-gray-500">منذ 30 دقيقة</span>
           </div>
         </div>
-      </div>
+      </Link>
 
       <div className="flex border-b border-gray-200 mb-4">
         <button

@@ -71,43 +71,47 @@ const Home = () => {
             <div>
               <h3 className="font-bold text-lg">جرب مساعد الأفكار الذكي</h3>
             </div>
-            <Button className="bg-white text-munaasib-red px-4 py-2 rounded-full font-medium hover:bg-gray-100">
-              ابدأ الآن
-            </Button>
+            <Link to="/event-planner">
+              <Button className="bg-white text-munaasib-red px-4 py-2 rounded-full font-medium hover:bg-gray-100">
+                ابدأ الآن
+              </Button>
+            </Link>
           </div>
         </div>
 
-        {/* Messages Section */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg">الرسائل</h3>
-            <Link to="/messages" className="text-munaasib-red text-sm">عرض الكل</Link>
-          </div>
-          
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-              <div className="w-10 h-10 bg-munaasib-red rounded-full flex items-center justify-center">
-                <MessageCircle className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-medium text-sm">أحمد محمد</h4>
-                <p className="text-xs text-gray-600">بخصوص حجز يوم الخميس...</p>
-              </div>
-              <span className="text-xs text-gray-500">منذ 5 دقائق</span>
+        {/* Messages Section - Make entire section clickable */}
+        <Link to="/messages" className="block">
+          <div className="bg-white rounded-lg shadow-sm p-4 mb-6 hover:shadow-md transition-shadow cursor-pointer">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg">الرسائل</h3>
+              <span className="text-munaasib-red text-sm">عرض الكل</span>
             </div>
             
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-              <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                <MessageCircle className="w-5 h-5 text-gray-600" />
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <div className="w-10 h-10 bg-munaasib-red rounded-full flex items-center justify-center">
+                  <MessageCircle className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-sm">أحمد محمد</h4>
+                  <p className="text-xs text-gray-600">بخصوص حجز يوم الخميس...</p>
+                </div>
+                <span className="text-xs text-gray-500">منذ 5 دقائق</span>
               </div>
-              <div className="flex-1">
-                <h4 className="font-medium text-sm">سارة علي</h4>
-                <p className="text-xs text-gray-600">شكراً لكم على الخدمة...</p>
+              
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                  <MessageCircle className="w-5 h-5 text-gray-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-sm">سارة علي</h4>
+                  <p className="text-xs text-gray-600">شكراً لكم على الخدمة...</p>
+                </div>
+                <span className="text-xs text-gray-500">منذ ساعة</span>
               </div>
-              <span className="text-xs text-gray-500">منذ ساعة</span>
             </div>
           </div>
-        </div>
+        </Link>
       </div>
     </Layout>
   );

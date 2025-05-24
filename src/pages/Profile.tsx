@@ -25,16 +25,13 @@ const Profile = () => {
         <h2 className="text-2xl font-bold">محمد عبدالله</h2>
         <p className="text-gray-600">m.abdullah@example.com</p>
 
-        <Link
-          to="/profile/edit"
-          className="mt-4 bg-munaasib-red text-white py-2 px-8 rounded-lg hover:bg-munaasib-darkRed transition-colors duration-200"
-        >
+        <button className="mt-4 bg-munaasib-red text-white py-2 px-8 rounded-lg hover:bg-munaasib-darkRed transition-colors duration-200">
           تعديل الملف الشخصي
-        </Link>
+        </button>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm divide-y divide-gray-100">
-        <Link to="/profile/account" className="flex items-center justify-between p-4">
+        <button className="flex items-center justify-between p-4 w-full text-right">
           <div className="flex items-center">
             <User className="w-6 h-6 ml-4 text-gray-600" />
             <span className="font-medium">معلومات الحساب</span>
@@ -42,7 +39,7 @@ const Profile = () => {
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-gray-500 flip-rtl">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
-        </Link>
+        </button>
 
         <Link to="/notifications" className="flex items-center justify-between p-4">
           <div className="flex items-center">
@@ -77,7 +74,7 @@ const Profile = () => {
           </svg>
         </Link>
 
-        <Link to="/privacy" className="flex items-center justify-between p-4">
+        <button className="flex items-center justify-between p-4 w-full text-right">
           <div className="flex items-center">
             <Lock className="w-6 h-6 ml-4 text-gray-600" />
             <span className="font-medium">الخصوصية والأمان</span>
@@ -85,7 +82,7 @@ const Profile = () => {
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-gray-500 flip-rtl">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
-        </Link>
+        </button>
       </div>
 
       <button className="w-full mt-8 py-4 bg-munaasib-gold text-white text-center rounded-lg font-bold hover:bg-munaasib-darkGold transition-colors duration-200">
