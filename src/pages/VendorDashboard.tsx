@@ -34,7 +34,7 @@ const VendorDashboard = () => {
   const convertArabicNumerals = (arabicNumber: string): number => {
     const arabicToEnglish: { [key: string]: string } = {
       '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
-      '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+      '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
     };
     
     let englishNumber = arabicNumber;
@@ -437,37 +437,26 @@ const VendorDashboard = () => {
       <div className="mb-8">
         <h2 className="text-lg font-bold mb-4">إعدادات الحساب</h2>
         <div className="grid grid-cols-2 gap-4">
-          <Link to="/profile/password" className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-2">
-            <div className="p-2 bg-gray-100 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-              </svg>
-            </div>
-            <span>كلمة المرور</span>
-          </Link>
-          <Link to="/profile/personal" className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-2">
+          <Link to="/account-info" className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-2">
             <div className="p-2 bg-gray-100 rounded-full">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
             </div>
-            <span>الملف الشخصي</span>
+            <div>
+              <span className="font-medium block">الملف الشخصي</span>
+              <Link to="/forgot-password" className="text-sm text-gray-600 hover:text-munaasib-red">
+                تغيير كلمة المرور
+              </Link>
+            </div>
           </Link>
-          <Link to="/profile/support" className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-2">
+          <Link to="/help" className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-2">
             <div className="p-2 bg-gray-100 rounded-full">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
               </svg>
             </div>
             <span>الدعم الفني</span>
-          </Link>
-          <Link to="/profile/subscription" className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-2">
-            <div className="p-2 bg-gray-100 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
-              </svg>
-            </div>
-            <span>خطة الاشتراك</span>
           </Link>
         </div>
       </div>

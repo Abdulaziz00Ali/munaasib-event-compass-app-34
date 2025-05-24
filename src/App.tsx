@@ -8,6 +8,9 @@ import Home from "./pages/Home";
 import Bookings from "./pages/Bookings";
 import Explore from "./pages/Explore";
 import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
+import AccountInfo from "./pages/AccountInfo";
+import PrivacySecurity from "./pages/PrivacySecurity";
 import Notifications from "./pages/Notifications";
 import Messages from "./pages/Messages";
 import Help from "./pages/Help";
@@ -38,6 +41,9 @@ const App = () => (
           <Route path="/explore" element={<Explore />} />
           <Route path="/events" element={<Events />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/edit-profile" element={<EditProfile />} />
+          <Route path="/account-info" element={<AccountInfo />} />
+          <Route path="/privacy-security" element={<PrivacySecurity />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/help" element={<Help />} />
