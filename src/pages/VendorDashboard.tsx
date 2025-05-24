@@ -411,7 +411,12 @@ const VendorDashboard = () => {
       </div>
 
       <div className="mb-8">
-        <h2 className="text-lg font-bold mb-4">الرسائل</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-bold">الرسائل</h2>
+          <Link to="/messages" className="text-munaasib-red text-sm hover:underline">
+            عرض جميع الرسائل
+          </Link>
+        </div>
         {messages.map((message) => (
           <div key={message.id} className="mb-4 bg-white p-4 rounded-lg shadow-sm">
             <div className="flex justify-between items-center">
