@@ -34,7 +34,7 @@ const VendorDashboard = () => {
   const convertArabicNumerals = (arabicNumber: string): number => {
     const arabicToEnglish: { [key: string]: string } = {
       '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
-      '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+      '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
     };
     
     let englishNumber = arabicNumber;
@@ -410,29 +410,31 @@ const VendorDashboard = () => {
         ))}
       </div>
 
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">الرسائل</h2>
-          <Link to="/messages" className="text-munaasib-red text-sm hover:underline">
-            عرض جميع الرسائل
-          </Link>
-        </div>
-        {messages.map((message) => (
-          <div key={message.id} className="mb-4 bg-white p-4 rounded-lg shadow-sm">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold">{message.sender}</h3>
-                <p className="text-gray-600 text-sm">{message.message}</p>
-              </div>
-              {message.unread && (
-                <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                  جديد
-                </div>
-              )}
-            </div>
+      <Link to="/messages" className="block mb-8">
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold">الرسائل</h2>
+            <span className="text-munaasib-red text-sm hover:underline">
+              عرض جميع الرسائل
+            </span>
           </div>
-        ))}
-      </div>
+          {messages.map((message) => (
+            <div key={message.id} className="mb-4 last:mb-0">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="font-semibold">{message.sender}</h3>
+                  <p className="text-gray-600 text-sm">{message.message}</p>
+                </div>
+                {message.unread && (
+                  <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    جديد
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Link>
 
       <div className="mb-8">
         <h2 className="text-lg font-bold mb-4">إعدادات الحساب</h2>
