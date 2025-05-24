@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import BookingCard from '@/components/ui/BookingCard';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { MessageCircle } from 'lucide-react';
 
 // Define booking type for better type safety
 type Booking = {
@@ -85,7 +86,6 @@ const Bookings = () => {
     const storedUpcomingBookings = localStorage.getItem('upcomingBookings');
     const storedPastBookings = localStorage.getItem('pastBookings');
     
-    // Initialize with stored bookings or defaults
     setUpcomingBookingsList(
       storedUpcomingBookings ? JSON.parse(storedUpcomingBookings) : DEFAULT_UPCOMING_BOOKINGS
     );
@@ -93,15 +93,13 @@ const Bookings = () => {
       storedPastBookings ? JSON.parse(storedPastBookings) : DEFAULT_PAST_BOOKINGS
     );
     
-    // Check for new booking from BookingForm
     const newBooking = localStorage.getItem('newBooking');
     if (newBooking) {
       const bookingData = JSON.parse(newBooking);
       
-      // Add the new booking to upcoming list
       setUpcomingBookingsList(prev => {
         const updatedList = [...prev, {
-          id: String(Date.now()), // Generate unique ID
+          id: String(Date.now()),
           title: bookingData.title || 'حجز جديد',
           venue: bookingData.venue || bookingData.serviceName,
           date: bookingData.date || '',
@@ -111,33 +109,27 @@ const Bookings = () => {
           status: bookingData.status || 'pending',
         }];
         
-        // Update localStorage
         localStorage.setItem('upcomingBookings', JSON.stringify(updatedList));
         return updatedList;
       });
       
-      // Clear the new booking from localStorage
       localStorage.removeItem('newBooking');
       
-      // Show toast for new booking
       toast({
         title: "تم إضافة حجز جديد",
         description: "تمت إضافة الحجز بنجاح إلى قائمة الحجوزات",
       });
     }
     
-    // Check for edited booking
     const editedBooking = localStorage.getItem('editedBooking');
     if (editedBooking) {
       const bookingData = JSON.parse(editedBooking);
       
-      // Update the booking in the appropriate list
       setUpcomingBookingsList(prev => {
         const updatedList = prev.map(booking => 
           booking.id === bookingData.id ? { ...booking, ...bookingData } : booking
         );
         
-        // Update localStorage
         localStorage.setItem('upcomingBookings', JSON.stringify(updatedList));
         return updatedList;
       });
@@ -147,15 +139,12 @@ const Bookings = () => {
           booking.id === bookingData.id ? { ...booking, ...bookingData } : booking
         );
         
-        // Update localStorage
         localStorage.setItem('pastBookings', JSON.stringify(updatedList));
         return updatedList;
       });
       
-      // Clear the edited booking from localStorage
       localStorage.removeItem('editedBooking');
       
-      // Show toast for edited booking
       toast({
         title: "تم تحديث الحجز",
         description: "تم تحديث تفاصيل الحجز بنجاح",
@@ -164,19 +153,15 @@ const Bookings = () => {
   }, [toast]);
   
   const handleEditBooking = (id: string) => {
-    // Find the booking to edit
     const bookingToEdit = [...upcomingBookingsList, ...pastBookingsList].find(
       booking => booking.id === id
     );
     
     if (bookingToEdit) {
-      // Store the booking in localStorage for the form to access
       localStorage.setItem('currentEditBooking', JSON.stringify(bookingToEdit));
       
-      // Navigation to edit page is now handled in the BookingCard component
       console.log('Editing booking:', id);
       
-      // Show toast notification
       toast({
         title: "تم فتح التعديل",
         description: "يمكنك تعديل تفاصيل الحجز الآن",
@@ -185,27 +170,22 @@ const Bookings = () => {
   };
   
   const handleCancelBooking = (id: string) => {
-    // Handle cancel booking
     console.log('Canceling booking:', id);
     
-    // Update the appropriate booking list
     if (activeTab === 'upcoming') {
       setUpcomingBookingsList(prev => {
         const updatedList = prev.filter(booking => booking.id !== id);
-        // Update localStorage
         localStorage.setItem('upcomingBookings', JSON.stringify(updatedList));
         return updatedList;
       });
     } else {
       setPastBookingsList(prev => {
         const updatedList = prev.filter(booking => booking.id !== id);
-        // Update localStorage
         localStorage.setItem('pastBookings', JSON.stringify(updatedList));
         return updatedList;
       });
     }
     
-    // Show toast notification
     toast({
       title: "تم إلغاء الحجز",
       description: "تم إلغاء الحجز بنجاح",
@@ -215,7 +195,6 @@ const Bookings = () => {
   const handleTabChange = (tab: 'upcoming' | 'past') => {
     setActiveTab(tab);
     
-    // Show toast notification
     toast({
       title: tab === 'upcoming' ? "الحجوزات القادمة" : "الحجوزات السابقة",
       description: `تم الانتقال إلى ${tab === 'upcoming' ? "الحجوزات القادمة" : "الحجوزات السابقة"}`,
@@ -224,6 +203,27 @@ const Bookings = () => {
 
   return (
     <Layout title="حجوزاتي">
+      {/* Messages Section */}
+      <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-bold text-lg">الرسائل</h3>
+          <Link to="/messages" className="text-munaasib-red text-sm">عرض الكل</Link>
+        </div>
+        
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+            <div className="w-10 h-10 bg-munaasib-red rounded-full flex items-center justify-center">
+              <MessageCircle className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-medium text-sm">مطبخ الأصالة</h4>
+              <p className="text-xs text-gray-600">بخصوص حجز الخميس...</p>
+            </div>
+            <span className="text-xs text-gray-500">منذ 30 دقيقة</span>
+          </div>
+        </div>
+      </div>
+
       <div className="flex border-b border-gray-200 mb-4">
         <button
           className={`py-2 px-4 font-medium ${

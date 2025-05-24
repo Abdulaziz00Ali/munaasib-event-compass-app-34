@@ -4,20 +4,24 @@ import { ArrowRight, Send, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Conversation, Message } from '@/pages/Messages';
+import { useToast } from '@/hooks/use-toast';
 
 interface ChatInterfaceProps {
   conversation: Conversation;
   messages: Message[];
   onBack: () => void;
+  onSendMessage?: (message: string) => void;
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({
   conversation,
   messages,
   onBack,
+  onSendMessage,
 }) => {
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
   const currentUserId = 'vendor1'; // This would come from auth context
 
   const scrollToBottom = () => {
@@ -30,14 +34,26 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
-      // Here you would typically send the message to your backend
       console.log('Sending message:', newMessage);
+      
+      // Call the onSendMessage callback if provided
+      if (onSendMessage) {
+        onSendMessage(newMessage);
+      }
+      
+      // Show success toast
+      toast({
+        title: "تم إرسال الرسالة",
+        description: "تم إرسال رسالتك بنجاح",
+      });
+      
       setNewMessage('');
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
       handleSendMessage();
     }
   };
@@ -86,7 +102,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 ? 'bg-blue-100 text-blue-800' 
                 : 'bg-green-100 text-green-800'
             }`}>
-              {conversation.participantType === 'customer' ? 'عميل' : 'مقدم خدمة'}
+              {conversation.participantType === 'customer' ? 'زبون' : 'مقدم خدمة'}
             </span>
           </div>
         </div>

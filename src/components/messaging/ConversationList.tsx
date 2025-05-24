@@ -74,7 +74,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
                       ? 'bg-blue-100 text-blue-800' 
                       : 'bg-green-100 text-green-800'
                   }`}>
-                    {conversation.participantType === 'customer' ? 'عميل' : 'مقدم خدمة'}
+                    {conversation.participantType === 'customer' ? 'زبون' : 'مقدم خدمة'}
                   </span>
                 </div>
               </div>

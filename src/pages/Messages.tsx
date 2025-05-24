@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import ConversationList from '@/components/messaging/ConversationList';
 import ChatInterface from '@/components/messaging/ChatInterface';
+import { useToast } from '@/hooks/use-toast';
 
 export interface Conversation {
   id: string;
@@ -26,9 +27,7 @@ export interface Message {
 
 const Messages = () => {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
-  
-  // Mock conversations data
-  const conversations: Conversation[] = [
+  const [conversations, setConversations] = useState<Conversation[]>([
     {
       id: '1',
       participantName: 'أحمد محمد',
@@ -53,55 +52,80 @@ const Messages = () => {
       lastMessageTime: 'منذ 3 ساعات',
       unreadCount: 1,
     },
-  ];
+  ]);
+  
+  const [messages, setMessages] = useState<{ [key: string]: Message[] }>({
+    '1': [
+      {
+        id: '1',
+        senderId: 'customer1',
+        senderName: 'أحمد محمد',
+        senderType: 'customer',
+        content: 'السلام عليكم، أريد حجز خدماتكم ليوم الخميس القادم',
+        timestamp: '2024-01-15 10:30',
+        isRead: true,
+      },
+      {
+        id: '2',
+        senderId: 'vendor1',
+        senderName: 'مطبخ الضيافة السعودي',
+        senderType: 'vendor',
+        content: 'وعليكم السلام، أهلاً وسهلاً. نعم متاح يوم الخميس. كم عدد الأشخاص؟',
+        timestamp: '2024-01-15 10:35',
+        isRead: true,
+      },
+      {
+        id: '3',
+        senderId: 'customer1',
+        senderName: 'أحمد محمد',
+        senderType: 'customer',
+        content: 'حوالي 50 شخص، والحفلة ستكون في الرياض',
+        timestamp: '2024-01-15 10:40',
+        isRead: true,
+      },
+      {
+        id: '4',
+        senderId: 'customer1',
+        senderName: 'أحمد محمد',
+        senderType: 'customer',
+        content: 'بخصوص حجز يوم الخميس، هل يمكن تأكيد الموعد؟',
+        timestamp: '2024-01-15 11:00',
+        isRead: false,
+      },
+    ]
+  });
 
-  // Mock messages for selected conversation
-  const getMessagesForConversation = (conversationId: string): Message[] => {
-    if (conversationId === '1') {
-      return [
-        {
-          id: '1',
-          senderId: 'customer1',
-          senderName: 'أحمد محمد',
-          senderType: 'customer',
-          content: 'السلام عليكم، أريد حجز خدماتكم ليوم الخميس القادم',
-          timestamp: '2024-01-15 10:30',
-          isRead: true,
-        },
-        {
-          id: '2',
-          senderId: 'vendor1',
-          senderName: 'مطبخ الضيافة السعودي',
-          senderType: 'vendor',
-          content: 'وعليكم السلام، أهلاً وسهلاً. نعم متاح يوم الخميس. كم عدد الأشخاص؟',
-          timestamp: '2024-01-15 10:35',
-          isRead: true,
-        },
-        {
-          id: '3',
-          senderId: 'customer1',
-          senderName: 'أحمد محمد',
-          senderType: 'customer',
-          content: 'حوالي 50 شخص، والحفلة ستكون في الرياض',
-          timestamp: '2024-01-15 10:40',
-          isRead: true,
-        },
-        {
-          id: '4',
-          senderId: 'customer1',
-          senderName: 'أحمد محمد',
-          senderType: 'customer',
-          content: 'بخصوص حجز يوم الخميس، هل يمكن تأكيد الموعد؟',
-          timestamp: '2024-01-15 11:00',
-          isRead: false,
-        },
-      ];
-    }
-    return [];
+  const { toast } = useToast();
+
+  const handleSendMessage = (messageContent: string) => {
+    if (!selectedConversation) return;
+
+    const newMessage: Message = {
+      id: String(Date.now()),
+      senderId: 'vendor1',
+      senderName: 'مطبخ الضيافة السعودي',
+      senderType: 'vendor',
+      content: messageContent,
+      timestamp: new Date().toISOString(),
+      isRead: false,
+    };
+
+    // Add message to conversation
+    setMessages(prev => ({
+      ...prev,
+      [selectedConversation]: [...(prev[selectedConversation] || []), newMessage]
+    }));
+
+    // Update conversation last message
+    setConversations(prev => prev.map(conv => 
+      conv.id === selectedConversation 
+        ? { ...conv, lastMessage: messageContent, lastMessageTime: 'الآن' }
+        : conv
+    ));
   };
 
   const selectedConversationData = conversations.find(c => c.id === selectedConversation);
-  const messages = selectedConversation ? getMessagesForConversation(selectedConversation) : [];
+  const conversationMessages = selectedConversation ? messages[selectedConversation] || [] : [];
 
   return (
     <Layout title="الرسائل" showBack>
@@ -120,8 +144,9 @@ const Messages = () => {
           {selectedConversation && selectedConversationData ? (
             <ChatInterface
               conversation={selectedConversationData}
-              messages={messages}
+              messages={conversationMessages}
               onBack={() => setSelectedConversation(null)}
+              onSendMessage={handleSendMessage}
             />
           ) : (
             <div className="h-full flex items-center justify-center text-gray-500">
