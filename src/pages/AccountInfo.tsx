@@ -1,102 +1,156 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, MapPin, Phone, Mail, Star, Award, Clock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Calendar, MapPin, Phone, Mail, Camera, Save, Key } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const AccountInfo = () => {
-  const accountData = {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  const [formData, setFormData] = useState({
     name: 'محمد عبدالله',
     email: 'm.abdullah@example.com',
     phone: '+966501234567',
-    joinDate: '15 يناير 2023',
     location: 'الرياض، المملكة العربية السعودية',
+    joinDate: '15 يناير 2023',
     accountType: 'مزود خدمة',
     verification: 'موثق',
-    rating: 4.8,
-    totalBookings: 245,
-    completedEvents: 238,
     responseTime: 'خلال ساعتين',
-    languages: ['العربية', 'الإنجليزية'],
     businessHours: 'السبت - الخميس: 9:00 ص - 9:00 م'
+  });
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSave = () => {
+    // Save the changes (in a real app, this would be an API call)
+    localStorage.setItem('vendorProfile', JSON.stringify(formData));
+    
+    toast({
+      title: "تم حفظ التغييرات",
+      description: "تم تحديث معلومات الحساب بنجاح",
+    });
+    
+    // Navigate back to vendor dashboard
+    navigate('/vendor-dashboard');
+  };
+
+  const handleChangePassword = () => {
+    // Set redirect path for password reset flow
+    localStorage.setItem('passwordResetRedirect', '/vendor-dashboard');
+    navigate('/forgot-password');
   };
 
   return (
     <Layout title="معلومات الحساب" showBack>
       <div className="space-y-6">
-        {/* Profile Summary */}
+        {/* Profile Summary - Editable */}
         <Card className="p-4">
-          <div className="flex items-center space-x-4 space-x-reverse">
-            <div className="w-16 h-16 rounded-full border-2 border-munaasib-gold overflow-hidden">
-              <img 
-                src="https://source.unsplash.com/featured/?portrait,man" 
-                alt="صورة الملف الشخصي" 
-                className="w-full h-full object-cover"
-              />
+          <div className="flex items-center space-x-4 space-x-reverse mb-4">
+            <div className="relative">
+              <div className="w-16 h-16 rounded-full border-2 border-munaasib-gold overflow-hidden">
+                <img 
+                  src="https://source.unsplash.com/featured/?portrait,man" 
+                  alt="صورة الملف الشخصي" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <button className="absolute bottom-0 right-0 bg-munaasib-red text-white p-1 rounded-full">
+                <Camera className="w-3 h-3" />
+              </button>
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-bold">{accountData.name}</h2>
-              <p className="text-gray-600">{accountData.accountType}</p>
+              <Input
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                className="text-xl font-bold mb-2 border-0 p-0 h-auto bg-transparent"
+              />
+              <p className="text-gray-600">{formData.accountType}</p>
               <div className="flex items-center mt-1">
                 <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                  {accountData.verification}
+                  {formData.verification}
                 </span>
               </div>
             </div>
           </div>
         </Card>
 
-        {/* Account Statistics */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="p-4 text-center">
-            <div className="flex items-center justify-center mb-2">
-              <Star className="w-5 h-5 text-yellow-500" />
+        {/* Change Password Section */}
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3 space-x-reverse">
+              <Key className="w-5 h-5 text-gray-500" />
+              <div>
+                <p className="font-medium">كلمة المرور</p>
+                <p className="text-sm text-gray-600">تغيير كلمة المرور الخاصة بك</p>
+              </div>
             </div>
-            <div className="text-2xl font-bold">{accountData.rating}</div>
-            <div className="text-sm text-gray-600">التقييم</div>
-          </Card>
-          
-          <Card className="p-4 text-center">
-            <div className="flex items-center justify-center mb-2">
-              <Award className="w-5 h-5 text-munaasib-red" />
-            </div>
-            <div className="text-2xl font-bold">{accountData.totalBookings}</div>
-            <div className="text-sm text-gray-600">إجمالي الحجوزات</div>
-          </Card>
-        </div>
+            <Button 
+              onClick={handleChangePassword}
+              variant="outline" 
+              className="text-munaasib-red border-munaasib-red hover:bg-munaasib-red hover:text-white"
+            >
+              تغيير كلمة المرور
+            </Button>
+          </div>
+        </Card>
 
-        {/* Personal Information */}
+        {/* Personal Information - Editable */}
         <Card className="p-4">
           <h3 className="text-lg font-bold mb-4">المعلومات الشخصية</h3>
           <div className="space-y-4">
-            <div className="flex items-center space-x-3 space-x-reverse">
-              <Mail className="w-5 h-5 text-gray-500" />
-              <div>
-                <p className="font-medium">البريد الإلكتروني</p>
-                <p className="text-gray-600">{accountData.email}</p>
+            <div>
+              <Label htmlFor="email">البريد الإلكتروني</Label>
+              <div className="flex items-center space-x-3 space-x-reverse">
+                <Mail className="w-5 h-5 text-gray-500" />
+                <Input
+                  id="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  className="text-right"
+                />
               </div>
             </div>
             
             <Separator />
             
-            <div className="flex items-center space-x-3 space-x-reverse">
-              <Phone className="w-5 h-5 text-gray-500" />
-              <div>
-                <p className="font-medium">رقم الجوال</p>
-                <p className="text-gray-600">{accountData.phone}</p>
+            <div>
+              <Label htmlFor="phone">رقم الجوال</Label>
+              <div className="flex items-center space-x-3 space-x-reverse">
+                <Phone className="w-5 h-5 text-gray-500" />
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  className="text-right"
+                />
               </div>
             </div>
             
             <Separator />
             
-            <div className="flex items-center space-x-3 space-x-reverse">
-              <MapPin className="w-5 h-5 text-gray-500" />
-              <div>
-                <p className="font-medium">الموقع</p>
-                <p className="text-gray-600">{accountData.location}</p>
+            <div>
+              <Label htmlFor="location">الموقع</Label>
+              <div className="flex items-center space-x-3 space-x-reverse">
+                <MapPin className="w-5 h-5 text-gray-500" />
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => handleInputChange('location', e.target.value)}
+                  className="text-right"
+                />
               </div>
             </div>
             
@@ -106,73 +160,48 @@ const AccountInfo = () => {
               <Calendar className="w-5 h-5 text-gray-500" />
               <div>
                 <p className="font-medium">تاريخ الانضمام</p>
-                <p className="text-gray-600">{accountData.joinDate}</p>
+                <p className="text-gray-600">{formData.joinDate}</p>
               </div>
             </div>
           </div>
         </Card>
 
-        {/* Business Information */}
+        {/* Business Information - Editable */}
         <Card className="p-4">
           <h3 className="text-lg font-bold mb-4">معلومات الأعمال</h3>
           <div className="space-y-4">
-            <div className="flex items-center space-x-3 space-x-reverse">
-              <Clock className="w-5 h-5 text-gray-500" />
-              <div>
-                <p className="font-medium">وقت الاستجابة</p>
-                <p className="text-gray-600">{accountData.responseTime}</p>
-              </div>
+            <div>
+              <Label htmlFor="responseTime">وقت الاستجابة</Label>
+              <Input
+                id="responseTime"
+                value={formData.responseTime}
+                onChange={(e) => handleInputChange('responseTime', e.target.value)}
+                className="text-right"
+              />
             </div>
             
             <Separator />
             
             <div>
-              <p className="font-medium mb-2">ساعات العمل</p>
-              <p className="text-gray-600">{accountData.businessHours}</p>
-            </div>
-            
-            <Separator />
-            
-            <div>
-              <p className="font-medium mb-2">اللغات</p>
-              <div className="flex space-x-2 space-x-reverse">
-                {accountData.languages.map((lang, index) => (
-                  <span key={index} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm">
-                    {lang}
-                  </span>
-                ))}
-              </div>
+              <Label htmlFor="businessHours">ساعات العمل</Label>
+              <Textarea
+                id="businessHours"
+                value={formData.businessHours}
+                onChange={(e) => handleInputChange('businessHours', e.target.value)}
+                className="text-right"
+              />
             </div>
           </div>
         </Card>
 
-        {/* Performance Metrics */}
-        <Card className="p-4">
-          <h3 className="text-lg font-bold mb-4">الأداء</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span>الفعاليات المكتملة</span>
-              <span className="font-bold">{accountData.completedEvents}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>معدل الإكمال</span>
-              <span className="font-bold text-green-600">
-                {Math.round((accountData.completedEvents / accountData.totalBookings) * 100)}%
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>معدل الاستجابة</span>
-              <span className="font-bold text-green-600">98%</span>
-            </div>
-          </div>
-        </Card>
-
-        {/* Edit Button */}
-        <Link to="/edit-profile">
-          <Button className="w-full bg-munaasib-red hover:bg-munaasib-red/90">
-            تعديل المعلومات
-          </Button>
-        </Link>
+        {/* Save Button */}
+        <Button 
+          onClick={handleSave}
+          className="w-full bg-munaasib-red hover:bg-munaasib-red/90"
+        >
+          <Save className="w-4 h-4 ml-2" />
+          حفظ تعديل المعلومات
+        </Button>
       </div>
     </Layout>
   );

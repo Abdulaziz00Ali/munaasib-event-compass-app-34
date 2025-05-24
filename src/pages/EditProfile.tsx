@@ -1,23 +1,21 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Camera, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const EditProfile = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: 'محمد عبدالله',
     email: 'm.abdullah@example.com',
     phone: '+966501234567',
-    bio: 'مطبخ شعبي متخصص في الأكلات التراثية السعودية',
-    location: 'الرياض، المملكة العربية السعودية',
-    experience: '5 سنوات',
-    specialties: 'المأكولات الشعبية، الحلويات التراثية'
+    location: 'الرياض، المملكة العربية السعودية'
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -28,10 +26,16 @@ const EditProfile = () => {
   };
 
   const handleSave = () => {
+    // Save the changes (in a real app, this would be an API call)
+    localStorage.setItem('userProfile', JSON.stringify(formData));
+    
     toast({
       title: "تم حفظ التغييرات",
       description: "تم تحديث ملفك الشخصي بنجاح",
     });
+    
+    // Navigate back to profile page
+    navigate('/profile');
   };
 
   return (
@@ -94,38 +98,6 @@ const EditProfile = () => {
               value={formData.location}
               onChange={(e) => handleInputChange('location', e.target.value)}
               className="text-right"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="bio">نبذة تعريفية</Label>
-            <Textarea
-              id="bio"
-              value={formData.bio}
-              onChange={(e) => handleInputChange('bio', e.target.value)}
-              className="text-right min-h-[100px]"
-              placeholder="اكتب نبذة عن خدماتك وخبراتك..."
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="experience">سنوات الخبرة</Label>
-            <Input
-              id="experience"
-              value={formData.experience}
-              onChange={(e) => handleInputChange('experience', e.target.value)}
-              className="text-right"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="specialties">التخصصات</Label>
-            <Textarea
-              id="specialties"
-              value={formData.specialties}
-              onChange={(e) => handleInputChange('specialties', e.target.value)}
-              className="text-right"
-              placeholder="اذكر تخصصاتك مفصولة بفواصل..."
             />
           </div>
         </div>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -445,12 +446,7 @@ const VendorDashboard = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
             </div>
-            <div>
-              <span className="font-medium block">الملف الشخصي</span>
-              <Link to="/forgot-password" className="text-sm text-gray-600 hover:text-munaasib-red">
-                تغيير كلمة المرور
-              </Link>
-            </div>
+            <span className="font-medium">الملف الشخصي</span>
           </Link>
           <Link to="/help" className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-2">
             <div className="p-2 bg-gray-100 rounded-full">

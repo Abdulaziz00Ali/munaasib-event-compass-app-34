@@ -33,16 +33,6 @@ const Profile = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm divide-y divide-gray-100">
-        <Link to="/account-info" className="flex items-center justify-between p-4">
-          <div className="flex items-center">
-            <User className="w-6 h-6 ml-4 text-gray-600" />
-            <span className="font-medium">معلومات الحساب</span>
-          </div>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-gray-500 flip-rtl">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
-        </Link>
-
         <Link to="/notifications" className="flex items-center justify-between p-4">
           <div className="flex items-center">
             <Bell className="w-6 h-6 ml-4 text-gray-600" />
