@@ -43,8 +43,12 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     console.error('Image failed to load:', image);
-    // Use a working fallback image
+    // Use a working fallback image for wedding halls
     e.currentTarget.src = 'https://images.unsplash.com/photo-1519167758481-83f29da96d81?w=400&h=300&fit=crop&auto=format';
+  };
+
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.log('Image loaded successfully:', image);
   };
 
   return (
@@ -56,6 +60,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
             alt={name}
             className="object-cover w-full h-48 rounded-lg shadow-sm"
             onError={handleImageError}
+            onLoad={handleImageLoad}
             loading="lazy"
           />
         </div>

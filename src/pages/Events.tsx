@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, MapPin, Utensils, Coffee, Building2, Package, Filter, Search } from 'lucide-react';
@@ -69,7 +68,7 @@ const Events = () => {
     },
     {
       icon: <Coffee className="w-8 h-8" />,
-      title: 'القهوجية',
+      title: 'القهوجية', 
       count: '+150 مزود',
       path: '/categories/coffee',
       bgColor: 'bg-pink-50',
@@ -78,7 +77,7 @@ const Events = () => {
     {
       icon: <Building2 className="w-8 h-8" />,
       title: 'القاعات',
-      count: '53 مزود',
+      count: '53 مزود', // Fixed count
       path: '/categories/halls',
       bgColor: 'bg-blue-50',
       category: 'venues',
@@ -236,7 +235,7 @@ const Events = () => {
           </div>
         </section>
 
-        {/* Featured Halls - Show only 4 venues */}
+        {/* Featured Halls - Show only 4 venues with correct total count */}
         {filteredItems.featuredHalls.length > 0 && (
           <section>
             <div className="flex justify-between items-center mb-4">
@@ -259,6 +258,13 @@ const Events = () => {
                           src={hall.image}
                           alt={hall.title}
                           className="w-full h-28 object-cover"
+                          onError={(e) => {
+                            console.error('Image failed to load:', hall.image);
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1519167758481-83f29da96d81?w=400&h=300&fit=crop&auto=format';
+                          }}
+                          onLoad={() => {
+                            console.log('Image loaded successfully:', hall.image);
+                          }}
                         />
                         <Badge className="absolute bottom-2 start-2 bg-munaasib-red">{hall.category}</Badge>
                       </div>

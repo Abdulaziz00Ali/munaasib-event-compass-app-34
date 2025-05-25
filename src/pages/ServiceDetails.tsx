@@ -53,99 +53,39 @@ const ServiceDetails = () => {
   // Try to get real venue data first, fallback to mock data
   const realVenue = getVenueById(id || '');
   
-  const service = realVenue ? {
+  if (!realVenue) {
+    return (
+      <Layout showBack showNavbar={false}>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <h2 className="text-xl font-bold mb-2">لم يتم العثور على الخدمة</h2>
+            <p className="text-gray-600">عذراً، لا يمكن العثور على تفاصيل هذه الخدمة</p>
+            <Link to="/explore" className="text-munaasib-red mt-4 inline-block">
+              العودة للاستكشاف
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const service = {
     id: realVenue.id,
     name: realVenue.name,
     location: realVenue.address,
     image: realVenue.image,
     rating: realVenue.rating,
-    reviewCount: Math.floor(Math.random() * 300) + 100, // Random review count
+    reviewCount: realVenue.reviews.length,
     description: realVenue.description,
     classification: 'قاعات أفراح',
-    capacity: '300 ضيف',
+    capacity: realVenue.name.includes('ليلتي') ? '400-600 ضيف (نساء) | 100-250 ضيف (رجال)' : '300 ضيف',
     basePrice: realVenue.price,
     features: realVenue.features,
     providesFullService: true,
     fullServiceDetails: 'القاعة متكفلة بتوفير خدمات القهوجية والمطبخ بشكل كامل، مع إمكانية إضافة خدمات إضافية حسب الطلب.',
-    packages: realVenue.packages, // Use real packages (Hall only vs Hall + Dinner)
+    packages: realVenue.packages,
     reviews: realVenue.reviews,
     gallery: realVenue.gallery
-  } : {
-    id: id || '1',
-    name: 'قصر الأفراح الملكي',
-    location: 'حي النرجس، الرياض',
-    image: 'https://source.unsplash.com/featured/?wedding,hall',
-    rating: 4.8,
-    reviewCount: 236,
-    description: 'نقدم خدمات تنظيم حفلات الزفاف والمناسبات بأعلى مستويات الجودة والفخامة. متخصصون في الضيافة السعودية الأصيلة مع لمسات عصرية.',
-    classification: 'قاعات أفراح',
-    capacity: '500 ضيف',
-    basePrice: 5000,
-    features: [
-      { 
-        name: 'ضيافة فاخرة', 
-        icon: '✨',
-        description: 'نقدم خدمات ضيافة متكاملة مع أرقى أنواع المشروبات والحلويات'
-      },
-      { 
-        name: 'إضاءة احترافية', 
-        icon: '💡',
-        description: 'أنظمة إضاءة متطورة مع خيارات متعددة للألوان والتأثيرات'
-      },
-      { 
-        name: 'تنظيم كامل', 
-        icon: '👥',
-        description: 'فريق متكامل من المنظمين والمنسقين لإدارة الحفل من البداية للنهاية'
-      },
-      { 
-        name: 'ركن سيارات', 
-        icon: '🚗',
-        description: 'خدمة صف السيارات متوفرة لجميع الضيوف'
-      }
-    ],
-    providesFullService: true,
-    fullServiceDetails: 'القاعة متكفلة بتوفير خدمات القهوجية والمطبخ بشكل كامل، مع إمكانية إضافة خدمات إضافية حسب الطلب.',
-    packages: [
-      {
-        id: 'gold',
-        name: 'الباقة الذهبية',
-        price: 15000,
-        description: 'قاعة فاخرة + ضيافة كاملة + تنسيق',
-      },
-      {
-        id: 'silver',
-        name: 'الباقة الفضية',
-        price: 10000,
-        description: 'قاعة + ضيافة أساسية',
-      },
-      {
-        id: 'bronze',
-        name: 'الباقة البرونزية',
-        price: 7000,
-        description: 'قاعة فقط',
-      },
-    ],
-    reviews: [
-      {
-        id: '1',
-        name: 'أحمد محمد',
-        rating: 5,
-        date: 'قبل 3 أيام',
-        comment: 'خدمة ممتازة وتنظيم رائع للحفل'
-      },
-      {
-        id: '2',
-        name: 'سارة عبدالله',
-        rating: 4,
-        date: 'قبل أسبوع',
-        comment: 'تجربة جميلة وموقع مميز'
-      }
-    ],
-    gallery: [
-      'https://source.unsplash.com/featured/?wedding,hall,luxury',
-      'https://source.unsplash.com/featured/?wedding,decoration',
-      'https://source.unsplash.com/featured/?wedding,cake'
-    ]
   };
 
   // Load any saved date information on component mount
@@ -361,6 +301,13 @@ const ServiceDetails = () => {
           src={service.image}
           alt={service.name}
           className="w-full h-64 object-cover"
+          onError={(e) => {
+            console.error('Main image failed to load:', service.image);
+            e.currentTarget.src = 'https://images.unsplash.com/photo-1519167758481-83f29da96d81?w=400&h=300&fit=crop&auto=format';
+          }}
+          onLoad={() => {
+            console.log('Main image loaded successfully:', service.image);
+          }}
         />
         
         <div className="absolute top-4 left-4 right-4 flex justify-between">
@@ -473,7 +420,7 @@ const ServiceDetails = () => {
           </div>
         </div>
         
-        {/* Photo Gallery */}
+        {/* Photo Gallery with improved error handling */}
         <div className="mt-6">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold">معرض الصور</h2>
@@ -486,6 +433,13 @@ const ServiceDetails = () => {
                   src={image} 
                   alt={`صورة ${index + 1}`}
                   className="w-full h-full object-cover rounded-lg"
+                  onError={(e) => {
+                    console.error('Gallery image failed to load:', image);
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1519167758481-83f29da96d81?w=400&h=300&fit=crop&auto=format';
+                  }}
+                  onLoad={() => {
+                    console.log('Gallery image loaded successfully:', image);
+                  }}
                 />
               </div>
             ))}
@@ -527,7 +481,7 @@ const ServiceDetails = () => {
           </div>
         )}
         
-        {/* Reviews */}
+        {/* Reviews with real data */}
         <div className="mt-6">
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-bold">التقييمات والآراء</h2>
@@ -535,18 +489,24 @@ const ServiceDetails = () => {
           </div>
           
           <div className="mt-4 space-y-4">
-            {service.reviews.map(review => (
-              <div key={review.id} className="border-b border-gray-100 pb-4">
-                <div className="flex justify-between">
-                  <div className="font-bold">{review.name}</div>
-                  <div className="text-gray-500 text-sm">{review.date}</div>
+            {service.reviews && service.reviews.length > 0 ? (
+              service.reviews.map(review => (
+                <div key={review.id} className="border-b border-gray-100 pb-4">
+                  <div className="flex justify-between">
+                    <div className="font-bold">{review.name}</div>
+                    <div className="text-gray-500 text-sm">{review.date}</div>
+                  </div>
+                  <div className="flex items-center mt-1">
+                    {renderRatingStars(review.rating)}
+                  </div>
+                  <p className="text-gray-700 mt-2">{review.comment}</p>
                 </div>
-                <div className="flex items-center mt-1">
-                  {renderRatingStars(review.rating)}
-                </div>
-                <p className="text-gray-700 mt-2">{review.comment}</p>
+              ))
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                لا توجد تقييمات حتى الآن
               </div>
-            ))}
+            )}
           </div>
         </div>
         

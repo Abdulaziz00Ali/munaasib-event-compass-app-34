@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import ServiceCard from '@/components/ui/ServiceCard';
 import { useUserType } from '@/hooks/useUserType';
-import { ChefHat, Coffee, Building2, Package, Search, Filter, MapPin } from 'lucide-react';
+import { ChefHat, Coffee, Building2, Package, Search, Filter, MapPin, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import GoogleMapComponent from '@/components/GoogleMapComponent';
 import { Input } from '@/components/ui/input';
@@ -171,6 +171,13 @@ const Explore = () => {
     }
   };
 
+  const handlePageChange = (pageNumber: number) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   // If the user is a vendor, redirect them to the VendorDashboard
   if (userType === 'vendor') {
     return (
@@ -263,7 +270,7 @@ const Explore = () => {
       </div>
 
       <div className="mt-6">
-        <h2 className="text-lg font-bold mb-4">مقدمي الخدمات القريبين ({totalServices})</h2>
+        <h2 className="text-lg font-bold mb-4">مقدمي الخدمات القريبين ({filteredServices.length})</h2>
         <div className="grid grid-cols-1 gap-6">
           {currentServices.length > 0 ? (
             currentServices.map((service) => (
@@ -292,59 +299,79 @@ const Explore = () => {
           )}
         </div>
 
-        {/* Pagination */}
+        {/* Enhanced Pagination */}
         {totalPages > 1 && (
-          <div className="mt-8">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    href="#" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (currentPage > 1) {
-                        setCurrentPage(currentPage - 1);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }
-                    }}
-                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-                
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const pageNumber = i + 1;
-                  return (
-                    <PaginationItem key={pageNumber}>
-                      <PaginationLink
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentPage(pageNumber);
-                          window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
-                        isActive={currentPage === pageNumber}
-                      >
-                        {pageNumber}
-                      </PaginationLink>
-                    </PaginationItem>
-                  );
-                })}
+          <div className="flex justify-center items-center mt-8 gap-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className={`p-2 rounded-lg ${
+                currentPage === 1 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
 
-                <PaginationItem>
-                  <PaginationNext 
-                    href="#" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (currentPage < totalPages) {
-                        setCurrentPage(currentPage + 1);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }
-                    }}
-                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+            {/* Show page numbers with ellipsis for large page counts */}
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNumber;
+              if (totalPages <= 5) {
+                pageNumber = i + 1;
+              } else if (currentPage <= 3) {
+                pageNumber = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNumber = totalPages - 4 + i;
+              } else {
+                pageNumber = currentPage - 2 + i;
+              }
+              
+              return (
+                <button
+                  key={pageNumber}
+                  onClick={() => handlePageChange(pageNumber)}
+                  className={`px-4 py-2 rounded-lg ${
+                    currentPage === pageNumber
+                      ? 'bg-munaasib-red text-white'
+                      : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              );
+            })}
+
+            {totalPages > 5 && currentPage < totalPages - 2 && (
+              <>
+                <span className="px-2 text-gray-500">...</span>
+                <button
+                  onClick={() => handlePageChange(totalPages)}
+                  className="px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  {totalPages}
+                </button>
+              </>
+            )}
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`p-2 rounded-lg ${
+                currentPage === totalPages 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+
+        {/* Page info */}
+        {totalPages > 1 && (
+          <div className="text-center mt-4 text-sm text-gray-600">
+            الصفحة {currentPage} من {totalPages} ({filteredServices.length} نتيجة)
           </div>
         )}
       </div>
