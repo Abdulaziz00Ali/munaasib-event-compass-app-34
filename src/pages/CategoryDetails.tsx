@@ -26,10 +26,10 @@ const CategoryDetails = () => {
     }
   }, [category]);
   
-  // Get real Tabuk venues for halls category
+  // Get ALL real Tabuk venues for halls category
   const tabukVenues = getAllTabukVenues();
   
-  // Convert Tabuk venues to provider format
+  // Convert ALL Tabuk venues to provider format
   const tabukProviders = tabukVenues.map(venue => ({
     id: venue.id,
     name: venue.name,
@@ -45,7 +45,7 @@ const CategoryDetails = () => {
     category: venue.category,
   }));
 
-  // Category-specific data with real Tabuk venues for halls
+  // Category-specific data with ALL real Tabuk venues for halls
   const categoryData = {
     kitchens: {
       title: 'المطابخ',
@@ -177,9 +177,9 @@ const CategoryDetails = () => {
     },
     halls: {
       title: 'القاعات',
-      description: 'قاعات احتفالات فاخرة من تبوك لجميع المناسبات',
-      filterOptions: ['الكل', 'تبوك', 'البساتين', 'الريان'],
-      providers: tabukProviders, // Use real Tabuk venues
+      description: `قاعات احتفالات فاخرة من تبوك لجميع المناسبات (${tabukProviders.length} قاعة متاحة)`,
+      filterOptions: ['الكل', 'تبوك', 'البساتين', 'الريان', 'منطقة الزراعية', 'المروج'],
+      providers: tabukProviders, // Use ALL real Tabuk venues
     },
     addons: {
       title: 'الكماليات والإضافات',
@@ -472,7 +472,7 @@ const CategoryDetails = () => {
             ))}
           </div>
         ) : filteredProviders.length > 0 ? (
-          // Default layout for other categories
+          // Default layout for other categories including halls
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {filteredProviders.map((provider: any) => (
               <div 

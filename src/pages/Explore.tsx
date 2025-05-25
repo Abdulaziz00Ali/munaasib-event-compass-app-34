@@ -29,7 +29,7 @@ const Explore = () => {
     { id: 'accessories', name: 'الكماليات', icon: <Package className="w-6 h-6 text-red-500" /> },
   ];
 
-  // Get real venues from Tabuk
+  // Get ALL real venues from Tabuk
   const tabukVenues = getAllTabukVenues();
   
   // Mock data for other categories (keeping existing ones)
@@ -84,7 +84,7 @@ const Explore = () => {
     }
   ];
 
-  // Convert Tabuk venues to service format and combine with mock data
+  // Convert ALL Tabuk venues to service format and combine with mock data
   const tabukServices = tabukVenues.map(venue => ({
     id: venue.id,
     name: venue.name,
@@ -241,7 +241,7 @@ const Explore = () => {
       </div>
 
       <div className="mt-6">
-        <h2 className="text-lg font-bold mb-4">مقدمي الخدمات القريبين</h2>
+        <h2 className="text-lg font-bold mb-4">مقدمي الخدمات القريبين ({filteredServices.length})</h2>
         <div className="grid grid-cols-1 gap-6">
           {filteredServices.length > 0 ? (
             filteredServices.map((service) => (

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, MapPin, Utensils, Coffee, Building2, Package, Filter, Search } from 'lucide-react';
@@ -99,9 +98,9 @@ const Events = () => {
     },
   ];
 
-  // Get real venues from Tabuk and convert to featured halls format
+  // Get ALL real venues from Tabuk and convert to featured halls format
   const tabukVenues = getAllTabukVenues();
-  const realFeaturedHalls: FeaturedHall[] = tabukVenues.slice(0, 4).map(venue => ({
+  const realFeaturedHalls: FeaturedHall[] = tabukVenues.map(venue => ({
     id: venue.id,
     title: venue.name,
     location: venue.address,
@@ -313,11 +312,11 @@ const Events = () => {
           </div>
         </section>
 
-        {/* Featured Halls - Now showing real Tabuk venues */}
+        {/* Featured Halls - Now showing ALL real Tabuk venues */}
         {filteredItems.featuredHalls.length > 0 && (
           <section>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold">قاعات مميزة من تبوك</h2>
+              <h2 className="text-lg font-bold">قاعات الأفراح في تبوك ({filteredItems.featuredHalls.length})</h2>
               <Link to="/categories/halls" className="text-munaasib-red text-sm">عرض الكل</Link>
             </div>
 
