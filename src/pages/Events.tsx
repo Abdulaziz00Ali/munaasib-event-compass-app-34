@@ -13,6 +13,7 @@ import CategoryCard from '@/components/ui/CategoryCard';
 import GoogleMapComponent from '@/components/GoogleMapComponent';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
+import { getAllTabukVenues } from '@/data/tabukVenues';
 
 // Define types for our different items
 type FeaturedHall = {
@@ -58,22 +59,8 @@ const Events = () => {
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   
   useEffect(() => {
-    // Try to get user location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        () => {
-          console.log("Unable to retrieve location");
-          // Use default location (Riyadh)
-          setUserLocation({ lat: 24.7136, lng: 46.6753 });
-        }
-      );
-    }
+    // Use Tabuk location as default
+    setUserLocation({ lat: 28.3998, lng: 36.5662 });
   }, []);
   
   const eventCategories = [
@@ -111,34 +98,21 @@ const Events = () => {
     },
   ];
 
-  const featuredHalls: FeaturedHall[] = [
-    {
-      id: '1',
-      title: 'قاعة الملكية',
-      location: 'حي النرجس، الرياض',
-      image: 'https://source.unsplash.com/featured/?wedding,hall',
-      category: 'قاعة',
-      position: { lat: 24.7336, lng: 46.6653 },
-      mapCategory: 'venues',
-      distance: '5.5 كم',
-      rating: 4.8,
-      price: 15000,
-      priceUnit: 'ر.س / ليلة',
-    },
-    {
-      id: '2',
-      title: 'قاعة الفيصلية',
-      location: 'فندق الفيصلية، الرياض',
-      image: 'https://source.unsplash.com/featured/?wedding,venue',
-      category: 'قاعة',
-      position: { lat: 24.7046, lng: 46.6953 },
-      mapCategory: 'venues',
-      distance: '4.2 كم',
-      rating: 4.9,
-      price: 20000,
-      priceUnit: 'ر.س / ليلة',
-    },
-  ];
+  // Get real venues from Tabuk and convert to featured halls format
+  const tabukVenues = getAllTabukVenues();
+  const realFeaturedHalls: FeaturedHall[] = tabukVenues.slice(0, 4).map(venue => ({
+    id: venue.id,
+    title: venue.name,
+    location: venue.address,
+    image: venue.image,
+    category: 'قاعة',
+    position: venue.position,
+    mapCategory: venue.category,
+    distance: venue.distance,
+    rating: venue.rating,
+    price: venue.price,
+    priceUnit: venue.priceUnit,
+  }));
 
   const specialOffers: SpecialOffer[] = [
     {
@@ -147,7 +121,7 @@ const Events = () => {
       discount: '25%',
       description: 'خصم 25% على جميع القاعات',
       image: 'https://source.unsplash.com/featured/?event,hall',
-      position: { lat: 24.7136, lng: 46.6753 },
+      position: { lat: 28.3998, lng: 36.5662 },
       mapCategory: 'venues',
       distance: '3.0 كم',
     },
@@ -157,7 +131,7 @@ const Events = () => {
       discount: '15%',
       description: 'خصم 15% على باقات الزفاف',
       image: 'https://source.unsplash.com/featured/?wedding,decoration',
-      position: { lat: 24.7246, lng: 46.6853 },
+      position: { lat: 28.4012, lng: 36.5698 },
       mapCategory: 'accessories',
       distance: '4.5 كم',
     },
@@ -170,7 +144,7 @@ const Events = () => {
       price: '5000',
       description: 'تبدأ من 5000 ريال',
       image: 'https://source.unsplash.com/featured/?wedding,decoration',
-      position: { lat: 24.7046, lng: 46.6753 },
+      position: { lat: 28.3845, lng: 36.5421 },
       mapCategory: 'accessories',
       distance: '5.8 كم',
     },
@@ -180,7 +154,7 @@ const Events = () => {
       price: '3500',
       description: 'تبدأ من 3500 ريال',
       image: 'https://source.unsplash.com/featured/?wedding,celebration',
-      position: { lat: 24.6946, lng: 46.6653 },
+      position: { lat: 28.4156, lng: 36.5789 },
       mapCategory: 'accessories',
       distance: '6.2 كم',
     },
@@ -188,7 +162,7 @@ const Events = () => {
 
   // Filter combined items by search query
   const filteredItems = {
-    featuredHalls: !searchQuery ? featuredHalls : featuredHalls.filter(hall => 
+    featuredHalls: !searchQuery ? realFeaturedHalls : realFeaturedHalls.filter(hall => 
       hall.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       hall.location.toLowerCase().includes(searchQuery.toLowerCase())
     ),
@@ -307,14 +281,14 @@ const Events = () => {
           </button>
         </div>
         
-        {/* Google Map - Toggle based on showMap state */}
+        {/* Google Map */}
         {showMap && (
           <section className="h-64 rounded-lg overflow-hidden shadow-md">
             <GoogleMapComponent
               markers={mapMarkers}
               onMarkerClick={handleMarkerClick}
               highlightedMarkerId={selectedVenue}
-              center={userLocation || { lat: 24.7136, lng: 46.6753 }}
+              center={userLocation || { lat: 28.3998, lng: 36.5662 }}
             />
           </section>
         )}
@@ -338,11 +312,11 @@ const Events = () => {
           </div>
         </section>
 
-        {/* Featured Halls */}
+        {/* Featured Halls - Now showing real Tabuk venues */}
         {filteredItems.featuredHalls.length > 0 && (
           <section>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold">قاعات مميزة</h2>
+              <h2 className="text-lg font-bold">قاعات مميزة من تبوك</h2>
               <Link to="/categories/halls" className="text-munaasib-red text-sm">عرض الكل</Link>
             </div>
 

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import ServiceCard from '@/components/ui/ServiceCard';
@@ -8,6 +7,7 @@ import { Link } from 'react-router-dom';
 import GoogleMapComponent from '@/components/GoogleMapComponent';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
+import { getAllTabukVenues, VenueData } from '@/data/tabukVenues';
 
 const Explore = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -18,22 +18,8 @@ const Explore = () => {
   const { userType } = useUserType();
 
   useEffect(() => {
-    // Try to get user location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        () => {
-          console.log("Unable to retrieve location");
-          // Use default location (Riyadh)
-          setUserLocation({ lat: 24.7136, lng: 46.6753 });
-        }
-      );
-    }
+    // Use Tabuk location as default
+    setUserLocation({ lat: 28.3998, lng: 36.5662 });
   }, []);
   
   const categories = [
@@ -43,20 +29,11 @@ const Explore = () => {
     { id: 'accessories', name: 'الكماليات', icon: <Package className="w-6 h-6 text-red-500" /> },
   ];
 
-  // Mock data that would come from Google Places API in a real implementation
-  const services = [
-    {
-      id: '1',
-      name: 'مطبخ الضيافة الملكي',
-      location: 'حي النرجس، الرياض',
-      image: 'https://source.unsplash.com/featured/?kitchen,catering',
-      rating: 4.8,
-      price: 150,
-      priceUnit: 'ر.س',
-      category: 'kitchens',
-      distance: '5.0 كم',
-      position: { lat: 24.7136, lng: 46.6753 },
-    },
+  // Get real venues from Tabuk
+  const tabukVenues = getAllTabukVenues();
+  
+  // Mock data for other categories (keeping existing ones)
+  const mockServices = [
     {
       id: '2',
       name: 'قهوجي أصايل',
@@ -68,18 +45,6 @@ const Explore = () => {
       category: 'coffee',
       distance: '3.2 كم',
       position: { lat: 24.7246, lng: 46.6528 },
-    },
-    {
-      id: '3',
-      name: 'قاعة اللؤلؤة',
-      location: 'حي الورود، الرياض',
-      image: 'https://source.unsplash.com/featured/?wedding,hall',
-      rating: 4.9,
-      price: 500,
-      priceUnit: 'ر.س',
-      category: 'venues',
-      distance: '4.7 كم',
-      position: { lat: 24.6941, lng: 46.6558 },
     },
     {
       id: '4',
@@ -119,8 +84,24 @@ const Explore = () => {
     }
   ];
 
+  // Convert Tabuk venues to service format and combine with mock data
+  const tabukServices = tabukVenues.map(venue => ({
+    id: venue.id,
+    name: venue.name,
+    location: venue.address,
+    image: venue.image,
+    rating: venue.rating,
+    price: venue.price,
+    priceUnit: venue.priceUnit,
+    category: venue.category,
+    distance: venue.distance,
+    position: venue.position,
+  }));
+
+  const allServices = [...tabukServices, ...mockServices];
+
   // Filter services based on selected category and search query
-  const filteredServices = services
+  const filteredServices = allServices
     .filter(service => {
       const categoryMatch = selectedCategory === 'all' || service.category === selectedCategory;
       const searchMatch = !searchQuery || 
@@ -136,7 +117,6 @@ const Explore = () => {
           return a.price - b.price;
         case 'distance':
         default:
-          // Parse the distance value (assuming format like "5.0 كم")
           const distanceA = parseFloat(a.distance.split(' ')[0]);
           const distanceB = parseFloat(b.distance.split(' ')[0]);
           return distanceA - distanceB;
@@ -154,7 +134,6 @@ const Explore = () => {
   const handleMarkerClick = (markerId: string) => {
     setSelectedServiceId(markerId);
     
-    // Scroll to the service card when a marker is clicked
     const serviceElement = document.getElementById(`service-${markerId}`);
     if (serviceElement) {
       serviceElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -164,10 +143,8 @@ const Explore = () => {
   const handleServiceCardClick = (serviceId: string) => {
     setSelectedServiceId(serviceId);
     
-    // Find the service to get its position
-    const service = services.find(s => s.id === serviceId);
+    const service = allServices.find(s => s.id === serviceId);
     if (service) {
-      // You could add any additional logic here if needed
       toast(`تم تحديد ${service.name} على الخريطة`);
     }
   };
@@ -223,7 +200,7 @@ const Explore = () => {
           markers={mapMarkers}
           onMarkerClick={handleMarkerClick}
           highlightedMarkerId={selectedServiceId}
-          center={userLocation || { lat: 24.7136, lng: 46.6753 }}
+          center={userLocation || { lat: 28.3998, lng: 36.5662 }}
         />
       </div>
 
@@ -259,7 +236,7 @@ const Explore = () => {
       <div className="mb-6">
         <div className="flex items-center mb-2">
           <MapPin className="w-5 h-5 ml-1 text-gray-600" />
-          <span className="text-gray-700">الرياض، المملكة العربية السعودية</span>
+          <span className="text-gray-700">تبوك، المملكة العربية السعودية</span>
         </div>
       </div>
 

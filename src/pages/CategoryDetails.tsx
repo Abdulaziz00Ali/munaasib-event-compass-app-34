@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, MapPin, Clock, Users, Coffee, Utensils, Building2, Package, Filter, Search } from 'lucide-react';
@@ -8,6 +7,7 @@ import ServiceCard from "@/components/ui/ServiceCard";
 import GoogleMapComponent from "@/components/GoogleMapComponent";
 import { Input } from "@/components/ui/input";
 import { toast } from '@/components/ui/sonner';
+import { getAllTabukVenues, VenueData } from '@/data/tabukVenues';
 
 const CategoryDetails = () => {
   const { category } = useParams<{ category: string }>();
@@ -18,26 +18,34 @@ const CategoryDetails = () => {
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   
   useEffect(() => {
-    // Try to get user location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        () => {
-          console.log("Unable to retrieve location");
-          // Use default location (Riyadh)
-          setUserLocation({ lat: 24.7136, lng: 46.6753 });
-        }
-      );
+    // Use Tabuk location for halls, Riyadh for others
+    if (category === 'halls') {
+      setUserLocation({ lat: 28.3998, lng: 36.5662 });
+    } else {
+      setUserLocation({ lat: 24.7136, lng: 46.6753 });
     }
-  }, []);
+  }, [category]);
   
-  // Category-specific data with coordinates for Google Maps
-  // In real implementation, this would come from Google Places API
+  // Get real Tabuk venues for halls category
+  const tabukVenues = getAllTabukVenues();
+  
+  // Convert Tabuk venues to provider format
+  const tabukProviders = tabukVenues.map(venue => ({
+    id: venue.id,
+    name: venue.name,
+    location: venue.address,
+    subtitle: `تتسع لـ 300 ضيف`, // Default capacity
+    price: venue.price,
+    priceUnit: venue.priceUnit,
+    rating: venue.rating,
+    reviews: Math.floor(Math.random() * 200) + 50, // Random review count
+    image: venue.image,
+    distance: venue.distance,
+    position: venue.position,
+    category: venue.category,
+  }));
+
+  // Category-specific data with real Tabuk venues for halls
   const categoryData = {
     kitchens: {
       title: 'المطابخ',
@@ -169,52 +177,9 @@ const CategoryDetails = () => {
     },
     halls: {
       title: 'القاعات',
-      description: 'قاعات احتفالات فاخرة لجميع المناسبات',
-      filterOptions: ['الكل', 'الرياض', 'جدة', 'الدمام'],
-      providers: [
-        {
-          id: '1',
-          name: 'قاعة الملكية',
-          location: 'حي النرجس، الرياض',
-          subtitle: 'تتسع لـ ٣٠٠ ضيف',
-          price: 15000,
-          priceUnit: 'ر.س / ليلة',
-          rating: 4.8,
-          reviews: 254,
-          distance: '5.5 كم',
-          image: 'https://source.unsplash.com/featured/?wedding,hall',
-          position: { lat: 24.7336, lng: 46.6653 },
-          category: 'venues',
-        },
-        {
-          id: '2',
-          name: 'قاعة الأميرة',
-          location: 'حي العليا، الرياض',
-          subtitle: 'تتسع لـ ٣٠٠ ضيف',
-          price: 20000,
-          priceUnit: 'ر.س / ليلة',
-          rating: 4.9,
-          reviews: 189,
-          distance: '4.3 كم',
-          image: 'https://source.unsplash.com/featured/?wedding,venue',
-          position: { lat: 24.7046, lng: 46.6953 },
-          category: 'venues',
-        },
-        {
-          id: '3',
-          name: 'قاعة السلطان',
-          location: 'حي الورود، الرياض',
-          subtitle: 'تتسع لـ ١٥٠ ضيف',
-          price: 12000,
-          priceUnit: 'ر.س / ليلة',
-          rating: 4.7,
-          reviews: 167,
-          distance: '7.9 كم',
-          image: 'https://source.unsplash.com/featured/?wedding,decoration',
-          position: { lat: 24.6841, lng: 46.6458 },
-          category: 'venues',
-        },
-      ],
+      description: 'قاعات احتفالات فاخرة من تبوك لجميع المناسبات',
+      filterOptions: ['الكل', 'تبوك', 'البساتين', 'الريان'],
+      providers: tabukProviders, // Use real Tabuk venues
     },
     addons: {
       title: 'الكماليات والإضافات',

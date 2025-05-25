@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -30,6 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ar } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { useUserType } from '@/hooks/useUserType';
+import { getVenueById } from '@/data/tabukVenues';
 
 const ServiceDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -50,8 +50,27 @@ const ServiceDetails = () => {
     { day: 20, month: 'ذو القعدة', year: 1446 },
   ]);
   
-  // This is mock data - in a real app, you would fetch this from an API
-  const service = {
+  // Try to get real venue data first, fallback to mock data
+  const realVenue = getVenueById(id || '');
+  
+  const service = realVenue ? {
+    id: realVenue.id,
+    name: realVenue.name,
+    location: realVenue.address,
+    image: realVenue.image,
+    rating: realVenue.rating,
+    reviewCount: Math.floor(Math.random() * 300) + 100, // Random review count
+    description: realVenue.description,
+    classification: 'قاعات أفراح',
+    capacity: '300 ضيف',
+    basePrice: realVenue.price,
+    features: realVenue.features,
+    providesFullService: true,
+    fullServiceDetails: 'القاعة متكفلة بتوفير خدمات القهوجية والمطبخ بشكل كامل، مع إمكانية إضافة خدمات إضافية حسب الطلب.',
+    packages: realVenue.packages,
+    reviews: realVenue.reviews,
+    gallery: realVenue.gallery
+  } : {
     id: id || '1',
     name: 'قصر الأفراح الملكي',
     location: 'حي النرجس، الرياض',
