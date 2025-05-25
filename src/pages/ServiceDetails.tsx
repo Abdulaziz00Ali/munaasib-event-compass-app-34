@@ -67,7 +67,7 @@ const ServiceDetails = () => {
     features: realVenue.features,
     providesFullService: true,
     fullServiceDetails: 'القاعة متكفلة بتوفير خدمات القهوجية والمطبخ بشكل كامل، مع إمكانية إضافة خدمات إضافية حسب الطلب.',
-    packages: realVenue.packages,
+    packages: realVenue.packages, // Use real packages (Hall only vs Hall + Dinner)
     reviews: realVenue.reviews,
     gallery: realVenue.gallery
   } : {
