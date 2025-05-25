@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, MapPin, Utensils, Coffee, Building2, Package, Filter, Search } from 'lucide-react';
@@ -239,7 +240,7 @@ const Events = () => {
         ...pkg
       } : null;
     } else {
-      const hall = featuredHalls.find(hall => hall.id === id);
+      const hall = realFeaturedHalls.find(hall => hall.id === id);
       return hall ? {
         displayName: hall.title, // Use title for halls
         ...hall
