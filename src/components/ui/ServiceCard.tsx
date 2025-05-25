@@ -41,6 +41,12 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
     navigate(`/booking/${id}`);
   };
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    console.error('Image failed to load:', image);
+    // Use a working fallback image
+    e.currentTarget.src = 'https://images.unsplash.com/photo-1519167758481-83f29da96d81?w=400&h=300&fit=crop&auto=format';
+  };
+
   return (
     <div className="service-card">
       <Link to={`/service/${id}`} onClick={handleCardClick}>
@@ -49,6 +55,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
             src={image}
             alt={name}
             className="object-cover w-full h-48 rounded-lg shadow-sm"
+            onError={handleImageError}
+            loading="lazy"
           />
         </div>
         <div className="flex justify-between items-start">

@@ -8,6 +8,14 @@ import GoogleMapComponent from '@/components/GoogleMapComponent';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
 import { getAllTabukVenues, VenueData } from '@/data/tabukVenues';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const Explore = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -15,6 +23,8 @@ const Explore = () => {
   const [sortBy, setSortBy] = useState<'distance' | 'rating' | 'price'>('distance');
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const servicesPerPage = 5;
   const { userType } = useUserType();
 
   useEffect(() => {
@@ -29,7 +39,7 @@ const Explore = () => {
     { id: 'accessories', name: 'الكماليات', icon: <Package className="w-6 h-6 text-red-500" /> },
   ];
 
-  // Get ALL real venues from Tabuk
+  // Get ALL 53 real venues from Tabuk
   const tabukVenues = getAllTabukVenues();
   
   // Mock data for other categories (keeping existing ones)
@@ -84,7 +94,7 @@ const Explore = () => {
     }
   ];
 
-  // Convert ALL Tabuk venues to service format and combine with mock data
+  // Convert ALL Tabuk venues (53) to service format and combine with mock data
   const tabukServices = tabukVenues.map(venue => ({
     id: venue.id,
     name: venue.name,
@@ -122,6 +132,18 @@ const Explore = () => {
           return distanceA - distanceB;
       }
     });
+
+  // Pagination logic
+  const totalServices = filteredServices.length;
+  const totalPages = Math.ceil(totalServices / servicesPerPage);
+  const startIndex = (currentPage - 1) * servicesPerPage;
+  const endIndex = startIndex + servicesPerPage;
+  const currentServices = filteredServices.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery, sortBy]);
   
   // Prepare markers for Google Maps
   const mapMarkers = filteredServices.map(service => ({
@@ -241,10 +263,10 @@ const Explore = () => {
       </div>
 
       <div className="mt-6">
-        <h2 className="text-lg font-bold mb-4">مقدمي الخدمات القريبين ({filteredServices.length})</h2>
+        <h2 className="text-lg font-bold mb-4">مقدمي الخدمات القريبين ({totalServices})</h2>
         <div className="grid grid-cols-1 gap-6">
-          {filteredServices.length > 0 ? (
-            filteredServices.map((service) => (
+          {currentServices.length > 0 ? (
+            currentServices.map((service) => (
               <div 
                 key={service.id} 
                 id={`service-${service.id}`}
@@ -269,6 +291,62 @@ const Explore = () => {
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-8">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    href="#" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (currentPage > 1) {
+                        setCurrentPage(currentPage - 1);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }
+                    }}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+                
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const pageNumber = i + 1;
+                  return (
+                    <PaginationItem key={pageNumber}>
+                      <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(pageNumber);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        isActive={currentPage === pageNumber}
+                      >
+                        {pageNumber}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
+
+                <PaginationItem>
+                  <PaginationNext 
+                    href="#" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (currentPage < totalPages) {
+                        setCurrentPage(currentPage + 1);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }
+                    }}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
     </Layout>
   );
