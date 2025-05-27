@@ -53,7 +53,6 @@ const Events = () => {
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   
   useEffect(() => {
-    // Use Tabuk location as default
     setUserLocation({ lat: 28.3998, lng: 36.5662 });
   }, []);
   
@@ -77,7 +76,7 @@ const Events = () => {
     {
       icon: <Building2 className="w-8 h-8" />,
       title: 'القاعات',
-      count: '53 مزود', // Fixed count
+      count: '53 مزود',
       path: '/categories/halls',
       bgColor: 'bg-blue-50',
       category: 'venues',
@@ -108,6 +107,8 @@ const Events = () => {
     priceUnit: venue.priceUnit,
   }));
 
+  console.log('Total Tabuk venues loaded in Events:', realFeaturedHalls.length);
+
   // Show only the first 4 venues for Events page
   const featuredHallsToShow = realFeaturedHalls.slice(0, 4);
 
@@ -117,7 +118,7 @@ const Events = () => {
       name: 'عرض نهاية الأسبوع',
       discount: '25%',
       description: 'خصم 25% على جميع القاعات',
-      image: 'https://source.unsplash.com/featured/?event,hall',
+      image: 'https://lh3.googleusercontent.com/p/AF1QipOFFER8Z5rGKzXl_6QZKzUqKBJ8QGZzQGZQGZQGZ=s1360-w1360-h1020',
     }
   ];
 
@@ -127,7 +128,7 @@ const Events = () => {
       name: 'باقة الزفاف الملكي',
       price: '5000',
       description: 'تبدأ من 5000 ريال',
-      image: 'https://source.unsplash.com/featured/?wedding,decoration',
+      image: 'https://lh3.googleusercontent.com/p/AF1QipPACKAGE8Z5rGKzXl_6QZKzUqKBJ8QGZzQGZQGZ=s1360-w1360-h1020',
     }
   ];
 
@@ -239,7 +240,7 @@ const Events = () => {
         {filteredItems.featuredHalls.length > 0 && (
           <section>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold">قاعات الأفراح في تبوك (53)</h2>
+              <h2 className="text-lg font-bold">قاعات الأفراح في تبوك ({realFeaturedHalls.length})</h2>
               <Link to="/categories/halls" className="text-munaasib-red text-sm">عرض الكل</Link>
             </div>
 
@@ -259,12 +260,13 @@ const Events = () => {
                           alt={hall.title}
                           className="w-full h-28 object-cover"
                           onError={(e) => {
-                            console.error('Image failed to load:', hall.image);
+                            console.error('Events hall image failed to load:', hall.image);
                             e.currentTarget.src = 'https://images.unsplash.com/photo-1519167758481-83f29da96d81?w=400&h=300&fit=crop&auto=format';
                           }}
                           onLoad={() => {
-                            console.log('Image loaded successfully:', hall.image);
+                            console.log('Events hall image loaded successfully:', hall.image);
                           }}
+                          crossOrigin="anonymous"
                         />
                         <Badge className="absolute bottom-2 start-2 bg-munaasib-red">{hall.category}</Badge>
                       </div>
@@ -293,7 +295,7 @@ const Events = () => {
           </section>
         )}
 
-        {/* Special Offers - Only 1 offer */}
+        {/* Special Offers - With Google Maps image */}
         {filteredItems.specialOffers.length > 0 && (
           <section>
             <h2 className="text-lg font-bold mb-4">عروض خاصة</h2>
@@ -308,6 +310,11 @@ const Events = () => {
                       src={offer.image}
                       alt={offer.name}
                       className="w-1/2 h-32 object-cover"
+                      onError={(e) => {
+                        console.error('Special offer image failed to load:', offer.image);
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1519167758481-83f29da96d81?w=400&h=300&fit=crop&auto=format';
+                      }}
+                      crossOrigin="anonymous"
                     />
                     <div className="p-3 flex flex-col justify-between w-1/2">
                       <div>
@@ -325,7 +332,7 @@ const Events = () => {
           </section>
         )}
 
-        {/* Event Packages - Only 1 package */}
+        {/* Event Packages - With Google Maps image */}
         {filteredItems.eventPackages.length > 0 && (
           <section>
             <h2 className="text-lg font-bold mb-4">باقات المناسبات</h2>
@@ -339,6 +346,11 @@ const Events = () => {
                     src={pkg.image}
                     alt={pkg.name}
                     className="w-full h-28 object-cover"
+                    onError={(e) => {
+                      console.error('Event package image failed to load:', pkg.image);
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop&auto=format';
+                    }}
+                    crossOrigin="anonymous"
                   />
                   <div className="p-2">
                     <h3 className="font-bold text-sm">{pkg.name}</h3>

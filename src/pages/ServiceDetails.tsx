@@ -38,7 +38,7 @@ const ServiceDetails = () => {
   const { userType } = useUserType();
   const isVendor = userType === 'vendor';
   
-  const [selectedPackage, setSelectedPackage] = useState<string>('gold');
+  const [selectedPackage, setSelectedPackage] = useState<string>('basic');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedHijriDay, setSelectedHijriDay] = useState<string | null>(null);
   const [selectedHijriMonth, setSelectedHijriMonth] = useState<string | null>(null);
@@ -50,7 +50,7 @@ const ServiceDetails = () => {
     { day: 20, month: 'ذو القعدة', year: 1446 },
   ]);
   
-  // Try to get real venue data first, fallback to mock data
+  // Get real venue data
   const realVenue = getVenueById(id || '');
   
   if (!realVenue) {
@@ -302,12 +302,13 @@ const ServiceDetails = () => {
           alt={service.name}
           className="w-full h-64 object-cover"
           onError={(e) => {
-            console.error('Main image failed to load:', service.image);
+            console.error('Service details main image failed to load:', service.image);
             e.currentTarget.src = 'https://images.unsplash.com/photo-1519167758481-83f29da96d81?w=400&h=300&fit=crop&auto=format';
           }}
           onLoad={() => {
-            console.log('Main image loaded successfully:', service.image);
+            console.log('Service details main image loaded successfully:', service.image);
           }}
+          crossOrigin="anonymous"
         />
         
         <div className="absolute top-4 left-4 right-4 flex justify-between">
@@ -420,7 +421,7 @@ const ServiceDetails = () => {
           </div>
         </div>
         
-        {/* Photo Gallery with improved error handling */}
+        {/* Photo Gallery with improved Google Maps image handling */}
         <div className="mt-6">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-bold">معرض الصور</h2>
@@ -434,12 +435,13 @@ const ServiceDetails = () => {
                   alt={`صورة ${index + 1}`}
                   className="w-full h-full object-cover rounded-lg"
                   onError={(e) => {
-                    console.error('Gallery image failed to load:', image);
+                    console.error('Gallery Google Maps image failed to load:', image);
                     e.currentTarget.src = 'https://images.unsplash.com/photo-1519167758481-83f29da96d81?w=400&h=300&fit=crop&auto=format';
                   }}
                   onLoad={() => {
-                    console.log('Gallery image loaded successfully:', image);
+                    console.log('Gallery Google Maps image loaded successfully:', image);
                   }}
+                  crossOrigin="anonymous"
                 />
               </div>
             ))}
@@ -481,16 +483,16 @@ const ServiceDetails = () => {
           </div>
         )}
         
-        {/* Reviews with real data */}
+        {/* Real Google Maps Reviews */}
         <div className="mt-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-lg font-bold">التقييمات والآراء</h2>
+            <h2 className="text-lg font-bold">التقييمات والآراء من Google Maps</h2>
             <Link to={`/reviews/${id}`} className="text-munaasib-red text-sm">عرض الكل</Link>
           </div>
           
           <div className="mt-4 space-y-4">
             {service.reviews && service.reviews.length > 0 ? (
-              service.reviews.map(review => (
+              service.reviews.slice(0, 3).map(review => (
                 <div key={review.id} className="border-b border-gray-100 pb-4">
                   <div className="flex justify-between">
                     <div className="font-bold">{review.name}</div>
@@ -504,7 +506,7 @@ const ServiceDetails = () => {
               ))
             ) : (
               <div className="text-center py-4 text-gray-500">
-                لا توجد تقييمات حتى الآن
+                لا توجد تقييمات متاحة من Google Maps حالياً
               </div>
             )}
           </div>

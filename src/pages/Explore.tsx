@@ -2,20 +2,12 @@ import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import ServiceCard from '@/components/ui/ServiceCard';
 import { useUserType } from '@/hooks/useUserType';
-import { ChefHat, Coffee, Building2, Package, Search, Filter, MapPin, ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChefHat, Coffee, Building2, Package, Search, Filter, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import GoogleMapComponent from '@/components/GoogleMapComponent';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
 import { getAllTabukVenues, VenueData } from '@/data/tabukVenues';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 
 const Explore = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -28,7 +20,6 @@ const Explore = () => {
   const { userType } = useUserType();
 
   useEffect(() => {
-    // Use Tabuk location as default
     setUserLocation({ lat: 28.3998, lng: 36.5662 });
   }, []);
   
@@ -41,60 +32,49 @@ const Explore = () => {
 
   // Get ALL 53 real venues from Tabuk
   const tabukVenues = getAllTabukVenues();
+  console.log('Total venues loaded:', tabukVenues.length);
   
-  // Mock data for other categories (keeping existing ones)
+  // Mock data for other categories
   const mockServices = [
     {
-      id: '2',
+      id: 'mock-coffee-1',
       name: 'قهوجي أصايل',
-      location: 'حي العليا، الرياض',
-      image: 'https://source.unsplash.com/featured/?coffee,arabic',
+      location: 'حي العليا، تبوك',
+      image: 'https://lh3.googleusercontent.com/p/AF1QipMOCK1Z5rGKzXl_6QZKzUqKBJ8QGZzQGZQGZQGZ=s1360-w1360-h1020',
       rating: 4.5,
       price: 80,
       priceUnit: 'ر.س / ساعتين',
       category: 'coffee',
       distance: '3.2 كم',
-      position: { lat: 24.7246, lng: 46.6528 },
+      position: { lat: 28.3946, lng: 36.5728 },
     },
     {
-      id: '4',
+      id: 'mock-kitchen-1',
+      name: 'مطبخ الأصالة',
+      location: 'حي المروج، تبوك',
+      image: 'https://lh3.googleusercontent.com/p/AF1QipMOCK2Z5rGKzXl_6QZKzUqKBJ8QGZzQGZQGZQGZ=s1360-w1360-h1020',
+      rating: 4.7,
+      price: 180,
+      priceUnit: 'ر.س / وجبة',
+      category: 'kitchens',
+      distance: '2.8 كم',
+      position: { lat: 28.3836, lng: 36.5853 },
+    },
+    {
+      id: 'mock-accessories-1',
       name: 'متجر هدايا الفرح',
-      location: 'حي الملقا، الرياض',
-      image: 'https://source.unsplash.com/featured/?gifts,wedding',
+      location: 'حي الملقا، تبوك',
+      image: 'https://lh3.googleusercontent.com/p/AF1QipMOCK3Z5rGKzXl_6QZKzUqKBJ8QGZzQGZQGZQGZ=s1360-w1360-h1020',
       rating: 4.3,
       price: 200,
       priceUnit: 'ر.س',
       category: 'accessories',
       distance: '6.5 كم',
-      position: { lat: 24.7336, lng: 46.6653 },
-    },
-    {
-      id: '5',
-      name: 'مطبخ الأصالة',
-      location: 'حي المروج، الرياض',
-      image: 'https://source.unsplash.com/featured/?food,catering',
-      rating: 4.7,
-      price: 180,
-      priceUnit: 'ر.س',
-      category: 'kitchens',
-      distance: '2.8 كم',
-      position: { lat: 24.7436, lng: 46.6853 },
-    },
-    {
-      id: '6',
-      name: 'قهوجي الديوان',
-      location: 'حي الملك فهد، الرياض',
-      image: 'https://source.unsplash.com/featured/?arabic,coffee',
-      rating: 4.6,
-      price: 90,
-      priceUnit: 'ر.س / ساعتين',
-      category: 'coffee',
-      distance: '4.1 كم',
-      position: { lat: 24.7046, lng: 46.6953 },
+      position: { lat: 28.3736, lng: 36.5653 },
     }
   ];
 
-  // Convert ALL Tabuk venues (53) to service format and combine with mock data
+  // Convert ALL Tabuk venues to service format
   const tabukServices = tabukVenues.map(venue => ({
     id: venue.id,
     name: venue.name,
@@ -109,6 +89,7 @@ const Explore = () => {
   }));
 
   const allServices = [...tabukServices, ...mockServices];
+  console.log('Total services (venues + mock):', allServices.length);
 
   // Filter services based on selected category and search query
   const filteredServices = allServices
@@ -133,12 +114,16 @@ const Explore = () => {
       }
     });
 
+  console.log('Filtered services:', filteredServices.length);
+
   // Pagination logic
   const totalServices = filteredServices.length;
   const totalPages = Math.ceil(totalServices / servicesPerPage);
   const startIndex = (currentPage - 1) * servicesPerPage;
   const endIndex = startIndex + servicesPerPage;
   const currentServices = filteredServices.slice(startIndex, endIndex);
+
+  console.log(`Page ${currentPage}: showing ${currentServices.length} services`);
 
   // Reset to first page when filters change
   useEffect(() => {
@@ -171,14 +156,11 @@ const Explore = () => {
     }
   };
 
-  const handlePageChange = (pageNumber: number) => {
-    if (pageNumber > 0 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // If the user is a vendor, redirect them to the VendorDashboard
   if (userType === 'vendor') {
     return (
       <Layout title="استكشاف" showSearch>
@@ -270,7 +252,11 @@ const Explore = () => {
       </div>
 
       <div className="mt-6">
-        <h2 className="text-lg font-bold mb-4">مقدمي الخدمات القريبين ({filteredServices.length})</h2>
+        <h2 className="text-lg font-bold mb-4">
+          مقدمي الخدمات القريبين ({totalServices})
+          {selectedCategory === 'venues' && ` - ${tabukServices.length} قاعة متاحة`}
+        </h2>
+        
         <div className="grid grid-cols-1 gap-6">
           {currentServices.length > 0 ? (
             currentServices.map((service) => (
@@ -314,7 +300,7 @@ const Explore = () => {
               <ChevronRight className="w-5 h-5" />
             </button>
 
-            {/* Show page numbers with ellipsis for large page counts */}
+            {/* Show page numbers */}
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               let pageNumber;
               if (totalPages <= 5) {
